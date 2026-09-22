@@ -50,4 +50,128 @@ canvas { width: 100%; height: 220px; border: 1px solid var(--line); border-radiu
   main { padding: 14px; }
   .summary-grid, .split, .timeline { grid-template-columns: 1fr; }
   .metric strong { font-size: 16px; }
+  .ro-buttons { flex-direction: column; }
+  .btn { width: 100%; }
 }
+
+/* ==========================================
+   Real Order Panel Styles (Phase 5.8)
+   ========================================== */
+.real-order-panel {
+  border: 2px solid #b42318;
+  background: #fffbfa;
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.badge-disabled { background: #f2f4f7; color: #475467; border: 1px solid #d0d5dd; }
+.badge-enabled { background: #ecfdf3; color: #027a48; border: 1px solid #a6f4c5; }
+
+.warning-banner {
+  background: #fef3f2;
+  border-left: 4px solid #b42318;
+  padding: 10px 14px;
+  border-radius: 4px;
+  color: #b42318;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.real-order-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.ro-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.ro-label { display: block; font-size: 12px; color: var(--muted); }
+.ro-value { display: block; font-size: 16px; margin-top: 4px; }
+.ro-value.highlight { color: #b42318; font-size: 20px; font-weight: bold; }
+.ro-sub { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+.ro-action-box {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.ro-qty-selector { margin-bottom: 12px; font-size: 14px; }
+.ro-buttons { display: flex; gap: 12px; }
+
+.btn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-buy { background: #0b7d45; color: #fff; }
+.btn-buy:hover:not(:disabled) { background: #086135; }
+.btn-sell { background: #b42318; color: #fff; }
+.btn-sell:hover:not(:disabled) { background: #911c13; }
+.btn-primary { background: #1467b3; color: #fff; }
+.btn-secondary { background: #eef2f6; color: #17202a; border: 1px solid var(--line); }
+
+.ro-status-msg {
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.ro-status-msg:empty { display: none; }
+.ro-status-msg.info { background: #eff8ff; color: #175cd3; border: 1px solid #b2ddff; }
+.ro-status-msg.error { background: #fef3f2; color: #b42318; border: 1px solid #fecdca; }
+.ro-status-msg.success { background: #edfcf2; color: #087443; border: 1px solid #a6f4c5; }
+
+.ro-history-wrap { margin-top: 14px; }
+.ro-history-wrap h3 { font-size: 14px; margin-bottom: 8px; color: var(--ink); }
+.ro-table { min-width: 100%; }
+.pill.buy { background: #dff7ea; color: var(--green); }
+.pill.sell { background: #fde7e7; color: var(--red); }
+.text-center { text-align: center; }
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal[hidden] { display: none !important; }
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  width: min(480px, 90%);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+.modal-content h3 { margin-top: 0; font-size: 18px; color: #b42318; }
+.modal-alert { background: #fef3f2; color: #b42318; padding: 8px 12px; border-radius: 4px; font-size: 13px; }
+.modal-table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+.modal-table th, .modal-table td { padding: 8px 10px; border-bottom: 1px solid #e8edf2; text-align: left; }
+.modal-table th { width: 35%; color: var(--muted); font-size: 13px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+

@@ -74,6 +74,7 @@ async function refresh() {
     const res = await api("/api/dashboard");
     lastSnapshot = await res.json();
     render();
+    await fetchRealOrderStatus();
   } catch (err) {
     console.error("Dashboard refresh failure:", err);
   }
@@ -168,3 +169,167 @@ function drawBars(id, rows, labelKey, valueKey, color) {
     ctx.fillText(v.toFixed(1), x, H - 10);
   });
 }
+
+// ==========================================
+// Real Order Dashboard Integration (Phase 5.8)
+// ==========================================
+let realOrderStatus = null;
+let pendingPrepareData = null;
+let isOrderSubmitting = false;
+
+async function fetchRealOrderStatus() {
+  if (!apiToken) return;
+  try {
+    const res = await api("/api/real_order/status");
+    realOrderStatus = await res.json();
+    renderRealOrder();
+  } catch (err) {
+    console.warn("Real order status fetch:", err);
+  }
+}
+
+function renderRealOrder() {
+  if (!realOrderStatus) return;
+  const ro = realOrderStatus;
+
+  const badge = $("realOrderBadge");
+  if (ro.real_order_enabled) {
+    badge.textContent = "실거래 가능 (ENABLED)";
+    badge.className = "badge badge-enabled";
+  } else {
+    badge.textContent = "기능 비활성 (DISABLED)";
+    badge.className = "badge badge-disabled";
+  }
+
+  $("roPrice").textContent = won(ro.current_price);
+  $("roQuoteTime").textContent = ro.quote_time_kst || "-";
+  $("roOrderableCash").textContent = won(ro.orderable_cash);
+  $("roHoldings").textContent = `${ro.real_holdings || 0} 주`;
+  $("roSessionBuyQty").textContent = `${ro.session_buy_qty || 0} 주`;
+  $("roSessionSellableQty").textContent = `${ro.session_sellable_qty || 0} 주`;
+
+  const buyBtn = $("roBuyBtn");
+  const sellBtn = $("roSellBtn");
+
+  buyBtn.disabled = !ro.can_buy || isOrderSubmitting;
+  sellBtn.disabled = !ro.can_sell || isOrderSubmitting;
+
+  buyBtn.onclick = () => prepareOrder("BUY");
+  sellBtn.onclick = () => prepareOrder("SELL");
+
+  // Render Session Orders
+  const orders = ro.orders || [];
+  const tbody = $("roOrdersBody");
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center">체결 내역이 없습니다.</td></tr>`;
+  } else {
+    tbody.innerHTML = orders.map((o) => `
+      <tr>
+        <td>#${esc(o.order_id)}</td>
+        <td><span class="pill ${o.side === 'BUY' ? 'buy' : 'sell'}">${esc(o.side)}</span></td>
+        <td>${esc(o.executed_qty || o.order_qty)}주</td>
+        <td>${won(o.order_price)}</td>
+        <td>${won(o.executed_price)}</td>
+        <td><span class="status-${(o.status || '').toLowerCase()}">${esc(o.status)}</span></td>
+        <td>${esc(o.filled_at_kst || o.submitted_at_kst || '-')}</td>
+        <td>${o.realized_pnl ? won(o.realized_pnl) : '-'}</td>
+      </tr>
+    `).join("");
+  }
+}
+
+async function prepareOrder(side) {
+  if (isOrderSubmitting) return;
+  const statusMsg = $("roStatusMsg");
+  statusMsg.textContent = "주문 조건을 검증 중입니다...";
+  statusMsg.className = "ro-status-msg info";
+
+  try {
+    const curPrice = realOrderStatus?.current_price || 3330;
+    const res = await fetch(`${cfg.apiBase}/api/real_order/prepare`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiToken}`
+      },
+      body: JSON.stringify({ side, price: curPrice })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      statusMsg.textContent = `주문 준비 실패: ${data.error || "알 수 없는 오류"}`;
+      statusMsg.className = "ro-status-msg error";
+      return;
+    }
+
+    pendingPrepareData = data;
+    showConfirmModal(data);
+    statusMsg.textContent = "";
+  } catch (err) {
+    statusMsg.textContent = `네트워크 오류: ${err.message}`;
+    statusMsg.className = "ro-status-msg error";
+  }
+}
+
+function showConfirmModal(data) {
+  $("modalSide").textContent = data.side === "BUY" ? "매수 (BUY)" : "매도 (SELL)";
+  $("modalPrice").textContent = won(data.expected_price);
+  $("modalTotal").textContent = data.side === "BUY" ? won(data.total_needed) : `${won(data.expected_price)} (예상 수령: ${won(data.expected_price - data.fee_estimate - data.tax_estimate)})`;
+  
+  const modal = $("roConfirmModal");
+  modal.hidden = false;
+
+  $("modalConfirmBtn").onclick = submitConfirmedOrder;
+  $("modalCancelBtn").onclick = () => {
+    modal.hidden = true;
+    pendingPrepareData = null;
+  };
+}
+
+async function submitConfirmedOrder() {
+  if (!pendingPrepareData || isOrderSubmitting) return;
+  isOrderSubmitting = true;
+  $("modalConfirmBtn").disabled = true;
+  $("modalConfirmBtn").textContent = "주문 전송 중...";
+
+  const statusMsg = $("roStatusMsg");
+  statusMsg.textContent = "실제 증권사 주문을 전송 중입니다. 잠시 기다려 주십시오...";
+  statusMsg.className = "ro-status-msg info";
+
+  try {
+    const res = await fetch(`${cfg.apiBase}/api/real_order/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiToken}`
+      },
+      body: JSON.stringify({
+        nonce: pendingPrepareData.nonce,
+        side: pendingPrepareData.side,
+        order_type: "LIMIT"
+      })
+    });
+
+    const data = await res.json();
+    $("roConfirmModal").hidden = true;
+
+    if (!res.ok || !data.success) {
+      statusMsg.textContent = `주문 실패: ${data.error || "체결 오류"}`;
+      statusMsg.className = "ro-status-msg error";
+    } else {
+      statusMsg.textContent = `✅ ${data.side === 'BUY' ? '매수' : '매도'} 주문이 성공적으로 체결되었습니다! (단가: ${won(data.executed_price)})`;
+      statusMsg.className = "ro-status-msg success";
+    }
+  } catch (err) {
+    $("roConfirmModal").hidden = true;
+    statusMsg.textContent = `주문 전송 실패: ${err.message}`;
+    statusMsg.className = "ro-status-msg error";
+  } finally {
+    isOrderSubmitting = false;
+    $("modalConfirmBtn").disabled = false;
+    $("modalConfirmBtn").textContent = "최종 주문 전송";
+    pendingPrepareData = null;
+    await fetchRealOrderStatus();
+  }
+}
+
