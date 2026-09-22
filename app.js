@@ -25,22 +25,33 @@ window.onload = () => {
 };
 
 async function onGoogleCredential(response) {
-  const res = await fetch(`${cfg.apiBase}/api/auth/google`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ credential: response.credential })
-  });
-  if (!res.ok) {
-    $("configStatus").textContent = `로그인 차단: ${res.status}`;
-    return;
+  try {
+    $("configStatus").textContent = "Google 인증 진행 중입니다...";
+    const res = await fetch(`${cfg.apiBase}/api/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    });
+    if (!res.ok) {
+      let errMsg = `로그인 차단: ${res.status}`;
+      try {
+        const errData = await res.json();
+        if (errData && errData.error) errMsg += ` (${errData.error})`;
+      } catch (_) {}
+      $("configStatus").textContent = errMsg;
+      return;
+    }
+    const body = await res.json();
+    apiToken = body.access_token;
+    $("loginPanel").hidden = true;
+    $("dashboard").hidden = false;
+    $("logoutBtn").hidden = false;
+    await refresh();
+    setInterval(refresh, Number(cfg.refreshMs || 10000));
+  } catch (err) {
+    console.error("Login failure:", err);
+    $("configStatus").textContent = `서버 연결 실패: ${err.message || "네트워크 오류"}`;
   }
-  const body = await res.json();
-  apiToken = body.access_token;
-  $("loginPanel").hidden = true;
-  $("dashboard").hidden = false;
-  $("logoutBtn").hidden = false;
-  await refresh();
-  setInterval(refresh, Number(cfg.refreshMs || 10000));
 }
 
 function logout() {
@@ -59,9 +70,13 @@ async function api(path) {
 }
 
 async function refresh() {
-  const res = await api("/api/dashboard");
-  lastSnapshot = await res.json();
-  render();
+  try {
+    const res = await api("/api/dashboard");
+    lastSnapshot = await res.json();
+    render();
+  } catch (err) {
+    console.error("Dashboard refresh failure:", err);
+  }
 }
 
 function render() {
