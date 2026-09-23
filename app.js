@@ -382,10 +382,7 @@ async function submitConfirmedOrder() {
 
 
 async function confirmEmergencyStop() {
-  const pin = prompt("🚨 비상정지를 작동하시겠습니까?
-
-신규 주문 접수가 즉시 차단됩니다.
-6자리 비상정지 PIN을 입력하세요:");
+  const pin = prompt("🚨 비상정지를 작동하시겠습니까?\n\n신규 주문 접수가 즉시 차단됩니다.\n6자리 비상정지 PIN을 입력하세요:");
   if (!pin) return;
   try {
     const res = await fetch(`${cfg.apiBase}/api/real_order/emergency_stop`, {
@@ -406,10 +403,7 @@ async function confirmEmergencyStop() {
 }
 
 async function confirmEmergencyClear() {
-  const pin = prompt("✅ 비상정지를 해제하시겠습니까?
-
-정지 해제 후에는 다시 주문이 가능해집니다.
-6자리 비상정지 PIN을 입력하세요:");
+  const pin = prompt("✅ 비상정지를 해제하시겠습니까?\n\n정지 해제 후에는 다시 주문이 가능해집니다.\n6자리 비상정지 PIN을 입력하세요:");
   if (!pin) return;
   try {
     const res = await fetch(`${cfg.apiBase}/api/real_order/emergency_stop_clear`, {
