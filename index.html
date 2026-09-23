@@ -33,8 +33,18 @@
       <section class="panel real-order-panel" id="realOrderPanel">
         <div class="panel-header">
           <h2>⚡ 실제 주문 테스트 (ACCOUNT_001)</h2>
-          <span id="realOrderBadge" class="badge badge-disabled">기능 비활성 (DISABLED)</span>
+          
+          <div>
+            <span id="emergencyStopBadge" class="badge" style="background:red;color:white;display:none;">비상정지(STOPPED)</span>
+            <span id="realOrderBadge" class="badge badge-disabled">기능 비활성 (DISABLED)</span>
+          </div>
         </div>
+        <div class="emergency-controls" style="margin-bottom:15px;padding:10px;border:1px solid #ff4d4f;border-radius:4px;background:#fff1f0;">
+          <button id="btnEmergencyStop" class="btn" style="background:#cf1322;color:white;cursor:pointer;">🚨 비상정지 작동 (STOP)</button>
+          <button id="btnEmergencyClear" class="btn" style="display:none;background:#52c41a;color:white;cursor:pointer;">비상정지 해제</button>
+        </div>
+        <div style="display:none;">
+
         <p class="warning-banner">⚠️ <strong>주의:</strong> 본 기능은 가상매매가 아닌 키움증권 실제 계좌 연동 주문 화면입니다. 1회 최대 1주만 허용됩니다.</p>
         
         <div class="real-order-grid">
