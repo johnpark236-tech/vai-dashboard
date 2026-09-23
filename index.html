@@ -180,6 +180,50 @@
         <h2>시스템 운영 상태</h2>
         <ul class="services" id="services"></ul>
       </section>
+
+      <!-- Condition Engine Settings Panel (Phase 5.8.3) -->
+      <section class="panel condition-engine-panel" id="conditionEnginePanel" style="border:1px solid #1890ff;border-radius:6px;padding:16px;margin-top:20px;background:#f0f5ff;">
+        <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h2 style="margin:0;color:#0050b3;">🎯 조건식 매매 엔진 (Phase 5.8.3)</h2>
+          <div>
+            <span id="conditionRuleBadge" class="badge" style="background:#595959;color:white;">규칙 비활성 (OFF)</span>
+            <span class="badge" style="background:#faad14;color:#000;">Mock 전용 (실주문 금지)</span>
+          </div>
+        </div>
+        <p style="font-size:0.9em;color:#595959;margin-bottom:16px;">
+          오전 지정가 매도(09:10 KST)와 오후 거래량 조건부 매수(14:10 KST)의 사용자 조건을 안전하게 관리합니다.
+        </p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;">
+          <!-- Morning Sell Box -->
+          <div style="background:white;padding:14px;border-radius:4px;border:1px solid #d9d9d9;">
+            <h3 style="margin-top:0;color:#cf1322;">🌅 오전 지정가 매도</h3>
+            <label style="display:block;margin-bottom:6px;font-size:0.85em;">실행 시각 (KST)</label>
+            <input type="text" id="condSellTime" value="09:10" style="width:100%;margin-bottom:10px;padding:6px;border:1px solid #ccc;border-radius:4px;" readonly>
+            <label style="display:block;margin-bottom:6px;font-size:0.85em;">지정가 매도 가격 (KRW)</label>
+            <input type="number" id="condSellPrice" value="3350" style="width:100%;margin-bottom:10px;padding:6px;border:1px solid #ccc;border-radius:4px;">
+            <label style="display:block;margin-bottom:6px;font-size:0.85em;">매도 수량 (최대 1주)</label>
+            <input type="number" id="condSellQty" value="1" min="1" max="1" style="width:100%;margin-bottom:10px;padding:6px;border:1px solid #ccc;border-radius:4px;" readonly>
+          </div>
+
+          <!-- Afternoon Buy Box -->
+          <div style="background:white;padding:14px;border-radius:4px;border:1px solid #d9d9d9;">
+            <h3 style="margin-top:0;color:#096dd9;">🌇 오후 거래량 조건부 매수</h3>
+            <label style="display:block;margin-bottom:6px;font-size:0.85em;">실행 시각 (KST)</label>
+            <input type="text" id="condBuyTime" value="14:10" style="width:100%;margin-bottom:10px;padding:6px;border:1px solid #ccc;border-radius:4px;" readonly>
+            <label style="display:block;margin-bottom:6px;font-size:0.85em;">최소 누적 거래량 기준 (주)</label>
+            <input type="number" id="condBuyMinVol" value="1000000" style="width:100%;margin-bottom:10px;padding:6px;border:1px solid #ccc;border-radius:4px;">
+            <label style="display:block;margin-bottom:6px;font-size:0.85em;">지정가 매수 가격 (KRW)</label>
+            <input type="number" id="condBuyPrice" value="3330" style="width:100%;margin-bottom:10px;padding:6px;border:1px solid #ccc;border-radius:4px;">
+          </div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+          <button id="btnSaveConditions" class="btn" style="background:#1890ff;color:white;cursor:pointer;padding:8px 16px;border:none;border-radius:4px;">조건 설정 저장</button>
+          <button id="btnValidateConditions" class="btn" style="background:#52c41a;color:white;cursor:pointer;padding:8px 16px;border:none;border-radius:4px;">조건식 Mock 검증</button>
+          <span id="condSaveStatus" style="font-size:0.85em;color:#595959;"></span>
+        </div>
+      </section>
     </section>
   </main>
 

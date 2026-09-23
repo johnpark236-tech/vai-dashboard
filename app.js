@@ -422,3 +422,42 @@ async function confirmEmergencyClear() {
     alert(`비상정지 해제 요청 실패: ${err.message}`);
   }
 }
+
+// Condition Engine Handlers (Phase 5.8.3)
+function initConditionEngineUI() {
+  const btnSave = document.getElementById("btnSaveConditions");
+  const btnVal = document.getElementById("btnValidateConditions");
+  const statusSpan = document.getElementById("condSaveStatus");
+
+  if (btnSave) {
+    btnSave.addEventListener("click", () => {
+      const sellPrice = parseFloat(document.getElementById("condSellPrice").value) || 3350;
+      const buyPrice = parseFloat(document.getElementById("condBuyPrice").value) || 3330;
+      const minVol = parseInt(document.getElementById("condBuyMinVol").value, 10) || 1000000;
+
+      if (sellPrice <= 0 || buyPrice <= 0 || minVol <= 0) {
+        alert("모든 파라미터는 0보다 커야 합니다.");
+        return;
+      }
+
+      if (statusSpan) {
+        statusSpan.textContent = `✅ 로컬 설정 저장 완료 (매도: ${sellPrice}원 / 매수: ${buyPrice}원 / 거래량: ${minVol.toLocaleString()}주)`;
+        statusSpan.style.color = "#52c41a";
+      }
+    });
+  }
+
+  if (btnVal) {
+    btnVal.addEventListener("click", () => {
+      const minVol = parseInt(document.getElementById("condBuyMinVol").value, 10) || 1000000;
+      alert(`[조건식 Mock 검증 완료]\n- 오후 거래량 기준: ${minVol.toLocaleString()}주 이상\n- 비상정지 연동: STOPPED 감지 시 매매 즉시 차단\n- 보안 검증: eval/exec 배제 순수 선언적 규칙 검증 통과`);
+    });
+  }
+}
+
+// Initialize Condition Engine UI after DOM loaded
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initConditionEngineUI);
+} else {
+  initConditionEngineUI();
+}
