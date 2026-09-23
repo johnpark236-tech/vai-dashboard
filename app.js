@@ -187,7 +187,15 @@ async function fetchRealOrderStatus() {
     realOrderStatus = await res.json();
     renderRealOrder();
   } catch (err) {
-    console.warn("Real order status fetch:", err);
+    console.warn("Real order status fetch failed:", err);
+    // RULE 5: API 통신 실패 시 UNKNOWN 상태로 처리하고 주문 차단
+    realOrderStatus = {
+      real_order_enabled: false,
+      emergency_stop: { state: "UNKNOWN", stopped: true },
+      can_buy: false,
+      can_sell: false,
+    };
+    renderRealOrder();
   }
 }
 
@@ -197,16 +205,37 @@ function renderRealOrder() {
 
 
   const estop = ro.emergency_stop;
-  if (estop && estop.stopped) {
-    $("emergencyStopBadge").style.display = "inline-block";
+  let estopState = "UNKNOWN";
+  let estopStopped = true; // default safe: treat unknown as stopped
+
+  if (estop && estop.state) {
+    estopState = estop.state;
+    estopStopped = estop.stopped === true;
+  }
+
+  // Show emergency stop state badge regardless of real_order_enabled
+  const stopBadge = $("emergencyStopBadge");
+  if (estopStopped || estopState === "UNKNOWN" || estopState === "STOP_ERROR") {
+    stopBadge.style.display = "inline-block";
+    stopBadge.textContent = estopState === "STOP_ERROR"
+      ? "⛔ STOP_ERROR"
+      : estopState === "UNKNOWN"
+      ? "❓ UNKNOWN"
+      : "🛑 비상정지(STOPPED)";
     $("btnEmergencyStop").style.display = "none";
-    $("btnEmergencyClear").style.display = "inline-block";
+    $("btnEmergencyClear").style.display = estopStopped ? "inline-block" : "none";
+    if (estopState === "STOP_ERROR" && !window._stopErrorAlerted) {
+      window._stopErrorAlerted = true;
+      alert("⛔ 비상정지 상태 파일 오류(STOP_ERROR)가 감지되었습니다.\n신규 주문이 차단됩니다.\n관리자에게 즉시 알리십시오.");
+    }
   } else {
-    $("emergencyStopBadge").style.display = "none";
+    stopBadge.style.display = "none";
+    window._stopErrorAlerted = false;
     $("btnEmergencyStop").style.display = "inline-block";
     $("btnEmergencyClear").style.display = "none";
   }
 
+  // Show real order feature badge
   const badge = $("realOrderBadge");
 
   if (ro.real_order_enabled) {
@@ -394,23 +423,6 @@ async function confirmEmergencyClear() {
       await fetchRealOrderStatus();
     } else {
       alert(`비상정지 해제 실패: ${data.error} - ${data.message || ''}`);
-    }
-  } catch (err) {
-    alert(`비상정지 해제 요청 실패: ${err.message}`);
-  }
-}
-/api/real_order/emergency_stop_clear`, {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" },
-      body: "{}"
-    });
-    if (!res.ok) throw new Error(`API Error: ${res.status}`);
-    const data = await res.json();
-    if (data.success) {
-      alert("비상정지가 성공적으로 해제되었습니다.");
-      await fetchRealOrderStatus();
-    } else {
-      alert(`비상정지 해제 실패: ${data.error}`);
     }
   } catch (err) {
     alert(`비상정지 해제 요청 실패: ${err.message}`);
