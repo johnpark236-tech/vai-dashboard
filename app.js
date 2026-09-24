@@ -494,6 +494,7 @@ if (document.readyState === "loading") {
   initConditionEngineUI();
 }
 
+  
   // Initialize Mock Manual Order
   const btnMockOrder = document.getElementById("btnSubmitMockOrder");
   if (btnMockOrder) {
@@ -504,15 +505,13 @@ if (document.readyState === "loading") {
           if (!price || !qty || price <= 0 || qty <= 0) {
               alert("유효한 가격과 수량을 입력하세요."); return;
           }
-          if (!confirm([Mock 수동주문 확인]
-방향: \n가격: \n수량: \n
-* 본 주문은 Mock 원장에만 기록됩니다.)) return;
+          if (!confirm("[Mock 수동주문 확인]\n방향: " + side + "\n가격: " + price + "\n수량: " + qty + "\n\n* 본 주문은 Mock 원장에만 기록됩니다.")) return;
           
           try {
               const apiToken = sessionStorage.getItem("vai_api_token");
-              const res = await fetch(${cfg.apiBase}/api/mock_order/submit, {
+              const res = await fetch(cfg.apiBase + "/api/mock_order/submit", {
                   method: "POST",
-                  headers: { "Content-Type": "application/json", Authorization: Bearer \ },
+                  headers: { "Content-Type": "application/json", Authorization: "Bearer " + apiToken },
                   body: JSON.stringify({ side: side, price: price, quantity: qty })
               });
               const data = await res.json();
@@ -533,8 +532,8 @@ if (document.readyState === "loading") {
   window.refreshMockLedger = async () => {
       try {
           const apiToken = sessionStorage.getItem("vai_api_token");
-          const res = await fetch(${cfg.apiBase}/api/mock_ledger, {
-              headers: { Authorization: Bearer \ }
+          const res = await fetch(cfg.apiBase + "/api/mock_ledger", {
+              headers: { Authorization: "Bearer " + apiToken }
           });
           const data = await res.json();
           if (data.success) {
@@ -542,16 +541,14 @@ if (document.readyState === "loading") {
               tbody.innerHTML = "";
               data.orders.forEach(o => {
                   const tr = document.createElement("tr");
-                  tr.innerHTML = 
-                      <td>\</td>
-                      <td style="color:">\</td>
-                      <td>\</td>
-                      <td>\</td>
-                      <td>\</td>
-                      <td>\</td>
-                      <td>\</td>
-                      <td>\</td>
-                  ;
+                  tr.innerHTML = "<td>" + o.order_id.substring(0,8) + "</td>" +
+                      "<td style='color:" + (o.side==='BUY'?'#cf1322':'#096dd9') + "'>" + o.side + "</td>" +
+                      "<td>" + o.order_price.toLocaleString() + "</td>" +
+                      "<td>" + o.order_quantity + "</td>" +
+                      "<td>" + o.filled_price.toLocaleString() + "</td>" +
+                      "<td>" + o.filled_quantity + "</td>" +
+                      "<td>" + o.order_status + "</td>" +
+                      "<td>" + o.created_at + "</td>";
                   tbody.appendChild(tr);
               });
           }
