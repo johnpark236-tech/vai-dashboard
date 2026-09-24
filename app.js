@@ -430,7 +430,7 @@ function initConditionEngineUI() {
   const statusSpan = document.getElementById("condSaveStatus");
 
   if (btnSave) {
-    btnSave.addEventListener("click", () => {
+    btnSave.addEventListener("click", async () => {
       const sellPrice = parseFloat(document.getElementById("condSellPrice").value) || 3350;
       const buyPrice = parseFloat(document.getElementById("condBuyPrice").value) || 3330;
       const minVol = parseInt(document.getElementById("condBuyMinVol").value, 10) || 1000000;
@@ -439,25 +439,128 @@ function initConditionEngineUI() {
         alert("모든 파라미터는 0보다 커야 합니다.");
         return;
       }
-
-      if (statusSpan) {
-        statusSpan.textContent = `✅ 로컬 설정 저장 완료 (매도: ${sellPrice}원 / 매수: ${buyPrice}원 / 거래량: ${minVol.toLocaleString()}주)`;
-        statusSpan.style.color = "#52c41a";
+      
+      try {
+          const apiToken = sessionStorage.getItem("vai_api_token");
+          const res = await fetch(`${cfg.apiBase}/api/condition/rule`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiToken}` },
+              body: JSON.stringify({ condSellPrice: sellPrice, condBuyPrice: buyPrice, condBuyMinVol: minVol })
+          });
+          const data = await res.json();
+          if (data.success) {
+              if (statusSpan) {
+                statusSpan.textContent = `✅ 서버 설정 저장 완료 (매도: ${sellPrice}원 / 매수: ${buyPrice}원 / 거래량: ${minVol.toLocaleString()}주)`;
+                statusSpan.style.color = "#52c41a";
+              }
+          } else {
+              alert("조건식 저장 실패: " + data.error);
+          }
+      } catch(e) {
+          alert("서버 연결 실패: " + e.message);
       }
     });
   }
 
   if (btnVal) {
-    btnVal.addEventListener("click", () => {
+    btnVal.addEventListener("click", async () => {
       const minVol = parseInt(document.getElementById("condBuyMinVol").value, 10) || 1000000;
-      alert(`[조건식 Mock 검증 완료]\n- 오후 거래량 기준: ${minVol.toLocaleString()}주 이상\n- 비상정지 연동: STOPPED 감지 시 매매 즉시 차단\n- 보안 검증: eval/exec 배제 순수 선언적 규칙 검증 통과`);
+      try {
+          const apiToken = sessionStorage.getItem("vai_api_token");
+          const res = await fetch(`${cfg.apiBase}/api/condition/mock_validate`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiToken}` },
+              body: JSON.stringify({ condBuyMinVol: minVol })
+          });
+          const data = await res.json();
+          if (data.success) {
+              alert(`[조건식 Mock 검증 결과]
+통과 여부: ${data.passed}
+사유: ${data.reasons.join(', ')}
+Mock 시장데이터: 거래량 ${data.mock_market.volume}`);
+          } else {
+              alert("검증 실패: " + data.error);
+          }
+      } catch(e) {
+          alert("서버 연결 실패: " + e.message);
+      }
     });
   }
 }
-
 // Initialize Condition Engine UI after DOM loaded
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initConditionEngineUI);
 } else {
   initConditionEngineUI();
 }
+
+  // Initialize Mock Manual Order
+  const btnMockOrder = document.getElementById("btnSubmitMockOrder");
+  if (btnMockOrder) {
+      btnMockOrder.addEventListener("click", async () => {
+          const side = document.getElementById("mockSide").value;
+          const price = parseFloat(document.getElementById("mockPrice").value);
+          const qty = parseInt(document.getElementById("mockQty").value);
+          if (!price || !qty || price <= 0 || qty <= 0) {
+              alert("유효한 가격과 수량을 입력하세요."); return;
+          }
+          if (!confirm([Mock 수동주문 확인]
+방향: \n가격: \n수량: \n
+* 본 주문은 Mock 원장에만 기록됩니다.)) return;
+          
+          try {
+              const apiToken = sessionStorage.getItem("vai_api_token");
+              const res = await fetch(${cfg.apiBase}/api/mock_order/submit, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: Bearer \ },
+                  body: JSON.stringify({ side: side, price: price, quantity: qty })
+              });
+              const data = await res.json();
+              if (data.success) {
+                  alert("가상 주문 접수 완료! (ID: " + data.order_id + ")");
+                  if (window.refreshMockLedger) window.refreshMockLedger();
+              } else {
+                  alert("가상 주문 실패: " + data.error);
+              }
+          } catch(e) {
+              alert("서버 연결 실패: " + e.message);
+          }
+      });
+  }
+
+  // Initialize Mock Ledger
+  const btnMockRefresh = document.getElementById("btnRefreshMockLedger");
+  window.refreshMockLedger = async () => {
+      try {
+          const apiToken = sessionStorage.getItem("vai_api_token");
+          const res = await fetch(${cfg.apiBase}/api/mock_ledger, {
+              headers: { Authorization: Bearer \ }
+          });
+          const data = await res.json();
+          if (data.success) {
+              const tbody = document.getElementById("mockLedgerBody");
+              tbody.innerHTML = "";
+              data.orders.forEach(o => {
+                  const tr = document.createElement("tr");
+                  tr.innerHTML = 
+                      <td>\</td>
+                      <td style="color:">\</td>
+                      <td>\</td>
+                      <td>\</td>
+                      <td>\</td>
+                      <td>\</td>
+                      <td>\</td>
+                      <td>\</td>
+                  ;
+                  tbody.appendChild(tr);
+              });
+          }
+      } catch(e) {
+          console.error("Mock 원장 조회 실패", e);
+      }
+  };
+  
+  if (btnMockRefresh) {
+      btnMockRefresh.addEventListener("click", window.refreshMockLedger);
+      window.refreshMockLedger(); // Initial load
+  }
