@@ -225,6 +225,34 @@
         </div>
       </section>
 
+      <!-- Real Manual Order Module -->
+      <section class="panel real-manual-panel" id="realManualPanel" style="border:1px solid #cf1322;border-radius:6px;padding:16px;margin-top:20px;background:#fff1f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h2 style="margin:0;color:#a8071a;">🔴 실제 증권사 수동 주문 (실제 주문 OFF)</h2>
+            <span class="badge" style="background:#595959;color:white;">준비 단계 (API 차단됨)</span>
+        </div>
+        <p style="font-size:0.9em;color:#cf1322;margin-bottom:12px;font-weight:bold;">
+          실제 주문 준비 단계입니다. 실제 주문은 비활성화되어 있습니다.
+        </p>
+        <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+            <select id="realSide" style="padding:6px;border-radius:4px;"><option value="BUY">매수 (BUY)</option><option value="SELL">매도 (SELL)</option></select>
+            <input type="number" id="realPrice" placeholder="주문 가격(KRW)" style="padding:6px;border-radius:4px;" value="3330">
+            <input type="number" id="realQty" placeholder="주문 수량" style="padding:6px;border-radius:4px;" value="1" readonly title="이번 단계에서는 1주만 허용됩니다.">
+            <button id="btnPrepareRealOrder" class="btn" style="background:#cf1322;color:white;">실제 주문 확인 (제출안됨)</button>
+        </div>
+        
+        <!-- Order Confirmation Modal -->
+        <div id="realOrderConfirmModal" style="display:none;margin-top:16px;padding:16px;border:1px solid #ffa39e;border-radius:4px;background:white;">
+            <h3 style="margin-top:0;color:#cf1322;">최종 주문 확인</h3>
+            <div id="realOrderConfirmDetails" style="margin-bottom:16px;font-size:0.95em;line-height:1.5;"></div>
+            <div style="display:flex;gap:8px;">
+                <button id="btnSubmitRealOrder" class="btn" style="background:#a8071a;color:white;font-weight:bold;">증권사로 주문 전송 (현재 불가)</button>
+                <button id="btnCancelRealOrder" class="btn" style="background:#f5f5f5;color:#595959;border:1px solid #d9d9d9;">취소</button>
+            </div>
+            <p id="realOrderStatusMsg" style="margin-top:8px;font-size:0.85em;color:#cf1322;"></p>
+        </div>
+      </section>
+
       <!-- Mock Manual Order Module -->
       <section class="panel mock-manual-panel" id="mockManualPanel" style="border:1px solid #722ed1;border-radius:6px;padding:16px;margin-top:20px;background:#f9f0ff;">
         <h2 style="margin:0 0 12px 0;color:#531dab;">🛠️ 수동 주문 및 체결 시뮬레이터 (Mock 전용)</h2>

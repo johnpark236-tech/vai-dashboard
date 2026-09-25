@@ -563,3 +563,84 @@ if (document.readyState === "loading") {
       btnMockRefresh.addEventListener("click", window.refreshMockLedger);
       window.refreshMockLedger(); // Initial load
   }
+
+    // --- Real Manual Order (5.8.4-M) ---
+    let currentRealOrderNonce = null;
+
+    const btnPrepareRealOrder = document.getElementById("btnPrepareRealOrder");
+    if(btnPrepareRealOrder) {
+        btnPrepareRealOrder.addEventListener("click", async () => {
+            const side = document.getElementById("realSide").value;
+            const price = document.getElementById("realPrice").value;
+            const apiToken = sessionStorage.getItem("vai_api_token");
+            if (!apiToken) {
+                alert("Google 로그인이 필요합니다.");
+                return;
+            }
+            try {
+                const res = await fetch(cfg.apiBase + "/api/real_order/prepare", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + apiToken
+                    },
+                    body: JSON.stringify({ side, price: parseFloat(price) })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    currentRealOrderNonce = data.nonce;
+                    const details = 
+                        <strong>계좌:</strong> \<br/>
+                        <strong>종목:</strong> \ (\)<br/>
+                        <strong>주문:</strong> \ \주<br/>
+                        <strong>지정가:</strong> \ 원<br/>
+                        <strong>수수료/세금 예상:</strong> \ 원<br/>
+                    ;
+                    document.getElementById("realOrderConfirmDetails").innerHTML = details;
+                    document.getElementById("realOrderConfirmModal").style.display = "block";
+                    document.getElementById("realOrderStatusMsg").innerText = "";
+                } else {
+                    alert("주문 준비 실패: " + data.error);
+                }
+            } catch(e) {
+                alert("주문 준비 API 오류: " + e.message);
+            }
+        });
+    }
+
+    const btnCancelRealOrder = document.getElementById("btnCancelRealOrder");
+    if(btnCancelRealOrder) {
+        btnCancelRealOrder.addEventListener("click", () => {
+            currentRealOrderNonce = null;
+            document.getElementById("realOrderConfirmModal").style.display = "none";
+        });
+    }
+
+    const btnSubmitRealOrder = document.getElementById("btnSubmitRealOrder");
+    if(btnSubmitRealOrder) {
+        btnSubmitRealOrder.addEventListener("click", async () => {
+            if(!currentRealOrderNonce) return;
+            const side = document.getElementById("realSide").value;
+            const apiToken = sessionStorage.getItem("vai_api_token");
+            try {
+                document.getElementById("realOrderStatusMsg").innerText = "주문 전송 중...";
+                const res = await fetch(cfg.apiBase + "/api/real_order/submit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + apiToken
+                    },
+                    body: JSON.stringify({ nonce: currentRealOrderNonce, side, order_type: "LIMIT" })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById("realOrderStatusMsg").innerText = "주문 성공: " + data.event_id;
+                    currentRealOrderNonce = null;
+                } else {
+                    document.getElementById("realOrderStatusMsg").innerText = "주문 실패: " + (data.error || data.message);
+                }
+            } catch(e) {
+                document.getElementById("realOrderStatusMsg").innerText = "오류 발생: " + e.message;
+            }
+        });
+    }
