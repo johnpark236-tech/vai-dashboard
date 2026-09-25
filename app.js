@@ -541,14 +541,16 @@ if (document.readyState === "loading") {
               tbody.innerHTML = "";
               data.orders.forEach(o => {
                   const tr = document.createElement("tr");
-                  tr.innerHTML = "<td>" + o.order_id.substring(0,8) + "</td>" +
-                      "<td style='color:" + (o.side==='BUY'?'#cf1322':'#096dd9') + "'>" + o.side + "</td>" +
-                      "<td>" + o.order_price.toLocaleString() + "</td>" +
-                      "<td>" + o.order_quantity + "</td>" +
-                      "<td>" + o.filled_price.toLocaleString() + "</td>" +
-                      "<td>" + o.filled_quantity + "</td>" +
-                      "<td>" + o.order_status + "</td>" +
-                      "<td>" + o.created_at + "</td>";
+                  tr.innerHTML = "<td><span title='" + (o.rule_id||'') + "'>" + o.order_id.substring(0,8) + "</span></td>" +
+                        "<td>" + (o.order_source || 'MANUAL_MOCK') + "</td>" +
+                        "<td style='color:" + (o.side==='BUY'?'#cf1322':'#096dd9') + "'>" + o.side + "</td>" +
+                        "<td>" + o.order_price.toLocaleString() + "</td>" +
+                        "<td>" + o.order_quantity + "</td>" +
+                        "<td>" + o.filled_price.toLocaleString() + "</td>" +
+                        "<td>" + o.filled_quantity + "</td>" +
+                        "<td>" + o.order_status + "</td>" +
+                        "<td>" + (o.condition_result || '-') + "</td>" +
+                        "<td>" + o.created_at + "</td>";
                   tbody.appendChild(tr);
               });
           }
