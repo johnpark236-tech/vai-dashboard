@@ -51,17 +51,46 @@ def decode(raw):
     return raw.decode("utf-8", "replace")
 
 
+DEBUG = []
+
+
 def universe():
     out = {}
+    # 1순위: 네이버 모바일 API(JSON)
+    for market in ("KOSPI", "KOSDAQ"):
+        for page in range(1, 40):
+            try:
+                js = json.loads(http(f"https://m.stock.naver.com/api/stocks/marketValue/{market}?page={page}&pageSize=100"))
+            except Exception as e:  # noqa: BLE001
+                DEBUG.append(f"api {market} p{page}: {e}")
+                break
+            rows = js.get("stocks") or []
+            if not rows:
+                break
+            for r in rows:
+                code, name = r.get("itemCode"), (r.get("stockName") or "").strip()
+                if code and re.fullmatch(r"\d{6}", code) and (r.get("stockEndType") in (None, "stock")) and not EXCLUDE.search(name):
+                    out[code] = (name, market)
+            time.sleep(0.1)
+    if len(out) >= 500:
+        return out
+    DEBUG.append(f"api 종목 수 {len(out)} → HTML 대체 경로")
+    # 2순위: 시가총액 페이지(HTML)
     for sosok, market in ((0, "KOSPI"), (1, "KOSDAQ")):
         for page in range(1, 60):
-            html = decode(http(f"https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={page}"))
-            rows = re.findall(r'code=(\d{6})"\s+class="tltle">([^<]+)</a>', html)
+            try:
+                html = decode(http(f"https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={page}"))
+            except Exception as e:  # noqa: BLE001
+                DEBUG.append(f"html {market} p{page}: {e}")
+                break
+            rows = re.findall(r'code=(\d{6})"[^>]*>([^<]+)</a>', html)
             if not rows:
+                if page == 1:
+                    DEBUG.append(f"html {market} p1 len={len(html)} head={html[:200]!r}")
                 break
             for code, name in rows:
                 name = name.strip()
-                if not EXCLUDE.search(name):
+                if name and not EXCLUDE.search(name):
                     out[code] = (name, market)
             time.sleep(0.15)
     return out
@@ -282,7 +311,7 @@ def main():
     grid = [{"targetPct": v[0], "adds": v[1], "stopPct": v[2], "maxHold": v[3], **summ(agg[v])} for v in variants]
     base_trades.sort(key=lambda t: t["pnl"], reverse=True)
     out = {
-        "generatedAt": stamp, "seconds": round(time.time() - t0),
+        "generatedAt": stamp, "seconds": round(time.time() - t0), "debug": DEBUG[:20],
         "rules": __doc__, "universe": len(series), "signals": n_sig,
         "period": {"from": min((b[0][0] for b in series.values() if b), default=None),
                    "to": max((b[-1][0] for b in series.values() if b), default=None)},
