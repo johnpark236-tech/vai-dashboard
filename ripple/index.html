@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VAI-RIPPLE 가상매매 현황</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--fg:#1b1f27;--mute:#6b7280;--line:#e2e5ea;--up:#e0242b;--down:#1a5fd6;--accent:#0f766e;--chip:#eef1f4;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#12151a;--card:#1b2028;--fg:#e8ebf0;--mute:#98a2b3;--line:#2c333e;--up:#ff5a5f;--down:#5b9bff;--accent:#2dd4bf;--chip:#262d38;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right)) 60px max(16px,env(safe-area-inset-left))}
+h1{font-size:20px;margin:0}
+.sub{color:var(--mute);font-size:12px;margin:4px 0 16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:8px 14px;border-radius:8px;font:inherit;cursor:pointer}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi .l{font-size:12px;color:var(--mute)}
+.kpi .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;min-width:0}
+.card h2{font-size:15px;margin:0;padding:12px 14px;border-bottom:1px solid var(--line)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right}
+th{font-size:12px;color:var(--mute);font-weight:600;background:var(--chip)}
+th.t,td.t{text-align:left}
+td.wrapc{white-space:normal;min-width:220px;text-align:left}
+tr:last-child td{border-bottom:0}
+.up{color:var(--up)}.down{color:var(--down)}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--chip);font-size:12px}
+.st-익절{background:var(--up);color:#fff}.st-손절{background:var(--down);color:#fff}
+.st-코드불일치,.st-데이터없음{background:#b45309;color:#fff}
+.code{color:var(--mute);font-size:12px}
+details{border-bottom:1px solid var(--line)}details:last-child{border-bottom:0}
+summary{padding:11px 14px;cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+summary b{flex:1 1 220px}
+.dbody{padding:0 14px 14px}
+.path{color:var(--mute);margin:0 0 8px}
+.note{color:var(--mute);font-size:12px;padding:12px 14px;margin:0}
+.rules{padding:6px 14px 14px;margin:0 0 0 18px}
+a{color:var(--accent)}
+.empty{padding:28px 14px;text-align:center;color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>VAI-RIPPLE 가상매매 현황</h1>
+  <p class="sub" id="stamp">불러오는 중…</p>
+  <div class="tabs">
+    <button data-tab="live" class="on">실전 가상매매</button>
+    <button data-tab="bt">과거 뉴스 백테스트</button>
+    <button data-tab="rule">운용 규칙</button>
+  </div>
+  <section id="live"></section>
+  <section id="bt" hidden></section>
+  <section id="rule" hidden></section>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const esc = v => v == null ? '' : String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const won = v => v == null ? '-' : Math.round(v).toLocaleString('ko-KR');
+const sign = v => v == null ? '' : (v > 0 ? 'up' : v < 0 ? 'down' : '');
+const pct = v => v == null ? '-' : (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+const swon = v => v == null ? '-' : (v > 0 ? '+' : '') + won(v);
+const chip = s => `<span class="chip st-${esc(s)}">${esc(s)}</span>`;
+const kpi = (l, v, cls = '') => `<div class="kpi"><div class="l">${l}</div><div class="v ${cls}">${v}</div></div>`;
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  ['live', 'bt', 'rule'].forEach(id => $('#' + id).hidden = id !== b.dataset.tab);
+});
+
+async function get(name) {
+  try { const r = await fetch(`./data/${name}?t=${Date.now()}`); if (!r.ok) return null; return await r.json(); }
+  catch (e) { return null; }
+}
+
+function renderLive(p) {
+  if (!p) { $('#live').innerHTML = '<div class="card"><div class="empty">아직 현황 데이터가 없습니다. 첫 가격 갱신 후 표시됩니다.</div></div>'; return; }
+  const s = p.summary, pos = p.positions || [];
+  const holding = pos.filter(x => x.status === '보유');
+  const done = pos.filter(x => ['익절', '손절', '기간만료'].includes(x.status));
+  const other = pos.filter(x => !holding.includes(x) && !done.includes(x));
+  let h = `<div class="kpis">
+    ${kpi('보유 종목', holding.length + '개')}
+    ${kpi('보유 매입금액', won(s.investedOpen) + '원')}
+    ${kpi('보유 평가금액', won(s.valueOpen) + '원')}
+    ${kpi('평가손익', swon(s.pnlOpen) + '원', sign(s.pnlOpen))}
+    ${kpi('실현손익', swon(s.pnlClosed) + '원', sign(s.pnlClosed))}
+    ${kpi('총손익 / 수익률', swon(s.pnlTotal) + '원 <small>' + pct(s.retTotalPct) + '</small>', sign(s.pnlTotal))}
+    ${kpi('익절 / 손절 / 만료', `${s.target} / ${s.stop} / ${s.expired}`)}
+  </div>`;
+  const row = x => `<tr>
+    <td class="t">${esc(x.entryDate || x.buyDate)}</td>
+    <td class="t"><b>${esc(x.name)}</b> <span class="code">${esc(x.code)}</span></td>
+    <td class="t">${esc(x.sector || '-')}</td>
+    <td class="t">${chip(x.status)}</td>
+    <td>${won(x.entry)}</td><td>${won(x.qty)}</td><td>${won(x.invested)}</td>
+    <td>${won(x.exit != null ? x.exit : x.last)}</td><td>${won(x.value)}</td>
+    <td class="${sign(x.pnl)}">${swon(x.pnl)}</td><td class="${sign(x.retPct)}">${pct(x.retPct)}</td>
+    <td>${won(x.target)}</td><td>${won(x.stop)}</td><td class="t">${esc(x.exitDate || x.deadline || '-')}</td>
+    <td>${x.scores ? esc(x.scores.total) : '-'}</td></tr>`;
+  const head = lastCol => `<tr><th class="t">매수일</th><th class="t">종목</th><th class="t">섹터</th><th class="t">상태</th><th>매수가</th><th>수량</th><th>매입금액</th><th>${lastCol[0]}</th><th>평가금액</th><th>손익</th><th>수익률</th><th>목표가</th><th>손절가</th><th class="t">${lastCol[1]}</th><th>CAPE</th></tr>`;
+  h += `<div class="card"><h2>보유 종목 (${holding.length})</h2>` + (holding.length ?
+    `<div class="scroll"><table>${head(['현재가', '만료일'])}${holding.map(row).join('')}</table></div>` : '<div class="empty">보유 종목이 없습니다.</div>') + '</div>';
+  if (other.length) h += `<div class="card"><h2>체결 대기 · 확인 필요 (${other.length})</h2><div class="scroll"><table>${head(['현재가', '만료일'])}${other.map(row).join('')}</table></div></div>`;
+  h += `<div class="card"><h2>매도 완료 (${done.length})</h2>` + (done.length ?
+    `<div class="scroll"><table>${head(['매도가', '매도일'])}${done.map(row).join('')}</table></div>` : '<div class="empty">매도 완료 종목이 없습니다.</div>') + '</div>';
+  h += `<div class="card"><h2>매수 근거 (뉴스 · 선정 사유)</h2>` + (pos.length ? pos.slice().reverse().map(x => `<details>
+    <summary><span class="code">${esc(x.buyDate)}</span><b>${esc(x.name)} <span class="code">${esc(x.code)} · ${esc(x.sector || '')}</span></b>${chip(x.status)}<span class="${sign(x.retPct)}">${pct(x.retPct)}</span></summary>
+    <div class="dbody">
+      <p><b>뉴스</b> (${esc(x.newsDate)}) ${/^https?:\/\//.test(x.newsUrl || '') ? `<a href="${esc(x.newsUrl)}" target="_blank" rel="noopener">${esc(x.newsTitle)}</a>` : esc(x.newsTitle)}</p>
+      <p>${esc(x.newsSummary)}</p>
+      <p class="path"><b>인과경로</b> ${esc(x.causepath)}</p>
+      <p><b>선정 사유</b> ${esc(x.reason)}</p>
+      <p><b>리스크</b> ${esc(x.risk)}</p>
+      <p class="path">VAI-CAPE 사건 ${esc(x.scores && x.scores.event)} + 기업 ${esc(x.scores && x.scores.biz)} = ${esc(x.scores && x.scores.total)}점 · 가격소스 종목명: ${esc(x.sourceName || '확인불가')}</p>
+    </div></details>`).join('') : '<div class="empty">내일부터 매일 1종목씩 기록됩니다.</div>') + '</div>';
+  $('#live').innerHTML = h;
+}
+
+function renderBT(b) {
+  if (!b) { $('#bt').innerHTML = '<div class="card"><div class="empty">백테스트 결과가 아직 없습니다. 첫 가격 갱신 후 표시됩니다.</div></div>'; return; }
+  const s = b.summary;
+  let h = `<div class="kpis">
+    ${kpi('사건 / 유효 종목', `${b.events.length}건 / ${s.valid}개`)}
+    ${kpi('익절(+' + b.config.targetPct + '%)', s.target + '건', 'up')}
+    ${kpi('손절(' + b.config.stopPct + '%)', s.stop + '건', 'down')}
+    ${kpi('기간만료 / 보유중', `${s.expired} / ${s.open}`)}
+    ${kpi('종료 건 승률', s.winRate == null ? '-' : s.winRate + '%')}
+    ${kpi('종료 건 평균수익률', pct(s.avgRetClosed), sign(s.avgRetClosed))}
+    ${kpi('총손익', swon(s.pnlTotal) + '원', sign(s.pnlTotal))}
+    ${kpi('86일 내 최고점 평균', pct(s.avgWindowPeak))}
+    ${kpi('최고점 +20%↑ / +50%↑ / +120%↑', `${s.reach20} / ${s.reach50} / ${s.reach120}`)}
+  </div>
+  <div class="card"><p class="note">매수: 뉴스 발생일 <b>다음 거래일 종가</b>. "86일 최고"는 손절 여부와 무관하게 매수 후 86일 동안 찍은 최고 수익률로, 목표 수익률을 조정할 때 참고하는 값입니다. 사건과 종목은 사후에 알려진 대표 사례를 고른 것이어서 실전보다 결과가 좋게 나올 수 있습니다. 코드와 종목명이 가격 소스와 다르면 "코드불일치"로 제외됩니다 (제외 ${s.excluded}개).</p></div>
+  <div class="card"><h2>사건별 결과</h2>`;
+  h += b.events.map(ev => `<details>
+    <summary><span class="code">${esc(ev.date)}</span><b>${esc(ev.name)}</b><span class="chip">${esc(ev.type)}</span><span class="${sign(ev.summary.pnlTotal)}">${swon(ev.summary.pnlTotal)}원</span></summary>
+    <div class="dbody"><p class="path">${esc(ev.causepath)}</p><div class="scroll"><table>
+    <tr><th class="t">종목</th><th class="t">상태</th><th class="t">매수일</th><th>매수가</th><th class="t">매도일</th><th>매도/현재가</th><th>수익률</th><th>손익</th><th>86일 최고</th><th>최저</th><th>보유일</th><th class="t">수혜 근거</th></tr>
+    ${ev.results.map(r => `<tr><td class="t"><b>${esc(r.name)}</b> <span class="code">${esc(r.code)}</span>${r.status === '코드불일치' ? `<br><span class="code">소스: ${esc(r.sourceName)}</span>` : ''}</td>
+      <td class="t">${chip(r.status)}</td><td class="t">${esc(r.entryDate || '-')}</td><td>${won(r.entry)}</td>
+      <td class="t">${esc(r.exitDate || '-')}</td><td>${won(r.exit != null ? r.exit : r.last)}</td>
+      <td class="${sign(r.retPct)}">${pct(r.retPct)}</td><td class="${sign(r.pnl)}">${swon(r.pnl)}</td>
+      <td class="${sign(r.windowPeakPct)}">${pct(r.windowPeakPct)}</td><td class="${sign(r.troughPct)}">${pct(r.troughPct)}</td>
+      <td>${r.holdDays == null ? '-' : r.holdDays}</td><td class="wrapc">${esc(r.reason)}</td></tr>`).join('')}
+    </table></div></div></details>`).join('');
+  $('#bt').innerHTML = h + '</div>';
+}
+
+function renderRule(c) {
+  c = c || {budget: 10000000, targetPct: 120, stopPct: -15, maxDays: 86};
+  $('#rule').innerHTML = `<div class="card"><h2>운용 규칙</h2><ol class="rules">
+    <li>평일 장 마감 후 당일 뉴스를 VAI-RIPPLE 방식(사건 → 인과경로 → 수혜 종목)으로 심층 분석해 <b>하루 1종목</b>을 고릅니다.</li>
+    <li>종목당 <b>${won(c.budget)}원</b>을 당일 종가로 가상 매수합니다 (휴장일이면 다음 거래일 종가).</li>
+    <li>매수가 대비 <b>+${c.targetPct}%</b>에 도달하면 익절합니다.</li>
+    <li>매수가 대비 <b>${c.stopPct}%</b>에 도달하면 손절합니다. 같은 날 둘 다 닿으면 손절로 처리합니다.</li>
+    <li>매수 후 달력 기준 <b>${c.maxDays}일</b>이 지나면 종가에 매도합니다.</li>
+    <li>하드필터(거래정지·관리종목·자본잠식 등)에 걸린 종목과 종목코드를 확인하지 못한 종목은 매수하지 않습니다.</li>
+    <li>수수료와 세금은 반영하지 않은 가상 매매입니다. 투자 권유가 아닙니다.</li>
+  </ol></div>`;
+}
+
+(async () => {
+  const [p, b, c] = await Promise.all([get('portfolio.json'), get('backtest.json'), get('config.json')]);
+  $('#stamp').textContent = '가격 기준: ' + ((p && p.generatedAt) || (b && b.generatedAt) || '갱신 전') + ' · 평일 장 마감 후 자동 갱신';
+  renderLive(p); renderBT(b); renderRule(c);
+})();
+</script>
+</body>
+</html>

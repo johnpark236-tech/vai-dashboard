@@ -1,0 +1,45 @@
+name: VAI-RIPPLE 가격 갱신
+
+on:
+  schedule:
+    - cron: "10 7 * * 1-5"   # 평일 16:10 KST (장 마감 후)
+    - cron: "30 9 * * 1-5"   # 평일 18:30 KST (보정)
+  push:
+    branches: [main]
+    paths:
+      - "ripple/data/trades.json"
+      - "ripple/data/events.json"
+      - "ripple/data/config.json"
+      - "ripple/scripts/**"
+      - ".github/workflows/ripple.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ripple-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 가격 수집 및 백테스트
+        run: python3 ripple/scripts/update.py
+      - name: 결과 커밋
+        run: |
+          git config user.name "ripple-bot"
+          git config user.email "ripple-bot@users.noreply.github.com"
+          git add ripple/data/backtest.json ripple/data/portfolio.json
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "ripple: 가격·현황 자동 갱신"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
