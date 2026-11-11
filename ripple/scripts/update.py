@@ -162,8 +162,9 @@ def simulate(bars, start, strict_after, cfg):
     qty = int(budget // entry)
     if qty <= 0:
         return {"status": "매수불가", "entryDate": eb["d"], "entry": entry}
-    target, stop = entry * (1 + tp / 100), entry * (1 + sp / 100)
-    deadline = (dt.date.fromisoformat(eb["d"]) + dt.timedelta(days=maxd)).isoformat()
+    target = entry * (1 + tp / 100)
+    stop = entry * (1 + sp / 100) if sp is not None else -1.0  # None = 손절 없음
+    deadline = (dt.date.fromisoformat(eb["d"]) + dt.timedelta(days=maxd)).isoformat() if maxd else "9999-12-31"  # None = 무기한
     r = {"entryDate": eb["d"], "entry": entry, "qty": qty, "invested": round(qty * entry),
          "target": round(target, 1), "stop": round(stop, 1), "deadline": deadline, "status": "보유"}
     peak, trough, wpeak = entry, entry, entry
@@ -270,7 +271,25 @@ def main():
             sweep.append({"targetPct": tp, "stopPct": sp, "pnlTotal": sm["pnlTotal"], "retTotalPct": sm["retTotalPct"],
                           "target": sm["target"], "stop": sm["stop"], "expired": sm["expired"], "open": sm["open"],
                           "winRate": sm["winRate"]})
-    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "summary": summarize(all_rows), "sweep": sweep, "events": events})
+    # 손절 유무 × 보유기간 시나리오
+    scenarios = []
+    for tp in (10, 15, 20, 30, 40, 50):
+        for sp in (-15, None):
+            for md in (86, 180, 365, None):
+                c2 = {**cfg, "targetPct": tp, "stopPct": sp, "maxDays": md}
+                rows = [simulate(get_series(code)[1], d, True, c2) for code, d in pairs]
+                sm = summarize(rows)
+                opened = [r for r in rows if r["status"] == "보유"]
+                scenarios.append({"targetPct": tp, "stopPct": sp, "maxDays": md,
+                                  "pnlTotal": sm["pnlTotal"], "retTotalPct": sm["retTotalPct"],
+                                  "target": sm["target"], "stop": sm["stop"], "expired": sm["expired"],
+                                  "open": sm["open"], "pnlOpen": sm["pnlOpen"], "pnlClosed": sm["pnlClosed"],
+                                  "avgHoldDays": round(sum(r["holdDays"] for r in rows) / len(rows), 1) if rows else None,
+                                  "maxHoldDays": max((r["holdDays"] for r in rows), default=None),
+                                  "worstOpenPct": min((r["retPct"] for r in opened), default=None),
+                                  "worstTroughPct": min((r["troughPct"] for r in rows), default=None)})
+    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "summary": summarize(all_rows), "sweep": sweep,
+                           "scenarios": scenarios, "events": events})
 
     # 2) 실전 가상매매: buyDate 당일(휴장이면 다음 거래일) 종가 매수
     trades = load("trades.json", [])
