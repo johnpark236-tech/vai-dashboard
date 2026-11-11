@@ -106,6 +106,7 @@ def fetch_yahoo(code):
 
 
 _cache = {}
+ADJUSTED = {}
 
 
 def get_series(code):
@@ -131,6 +132,15 @@ def get_series(code):
                 break
         time.sleep(0.25)
     bars.sort(key=lambda b: b["d"])
+    # 감자·병합·분할 등으로 하루 새 가격이 끊긴 경우(상한가 +30%로는 불가능한 변동) 이전 봉을 비율 보정
+    for i in range(len(bars) - 1, 0, -1):
+        ratio = bars[i]["o"] / bars[i - 1]["c"] if bars[i - 1]["c"] else 1
+        if ratio > 1.6 or ratio < 0.5:
+            print(f"  [보정] {code} {bars[i]['d']} 가격 불연속 x{ratio:.3f}", file=sys.stderr)
+            ADJUSTED.setdefault(code, []).append({"date": bars[i]["d"], "ratio": round(ratio, 4)})
+            for bb in bars[:i]:
+                for k in ("o", "h", "l", "c"):
+                    bb[k] *= ratio
     # 장중(15:40 이전)에는 오늘 봉이 미확정이므로 제외
     now = now_kst()
     today = now.strftime("%Y-%m-%d")
@@ -289,7 +299,7 @@ def main():
                                   "worstOpenPct": min((r["retPct"] for r in opened), default=None),
                                   "worstTroughPct": min((r["troughPct"] for r in rows), default=None)})
     dump("backtest.json", {"generatedAt": stamp, "config": cfg, "summary": summarize(all_rows), "sweep": sweep,
-                           "scenarios": scenarios, "events": events})
+                           "scenarios": scenarios, "adjusted": ADJUSTED, "events": events})
 
     # 2) 실전 가상매매: buyDate 당일(휴장이면 다음 거래일) 종가 매수
     trades = load("trades.json", [])
