@@ -1,0 +1,34 @@
+{
+ "generatedAt": "2026-11-11 22:05 KST",
+ "config": {
+  "budget": 10000000,
+  "targetPct": 120,
+  "stopPct": -15,
+  "maxDays": 86,
+  "note": "종목당 1천만원 가상매수. +120% 도달 시 익절, -15% 도달 시 손절, 매수 후 달력 기준 86일 경과 시 종가 매도. 수수료·세금 미반영."
+ },
+ "summary": {
+  "total": 0,
+  "valid": 0,
+  "excluded": 0,
+  "open": 0,
+  "closed": 0,
+  "target": 0,
+  "stop": 0,
+  "expired": 0,
+  "winRate": null,
+  "avgRetClosed": null,
+  "invested": 0,
+  "investedOpen": 0,
+  "valueOpen": 0,
+  "pnlOpen": 0,
+  "pnlClosed": 0,
+  "pnlTotal": 0,
+  "retTotalPct": null,
+  "avgWindowPeak": null,
+  "reach20": 0,
+  "reach50": 0,
+  "reach120": 0
+ },
+ "positions": []
+}
