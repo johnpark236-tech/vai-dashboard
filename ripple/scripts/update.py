@@ -419,7 +419,25 @@ def main():
             all_rows.append(r)
         ev.pop("stocks", None)
         ev["summary"] = summarize(ev["results"])
-    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "auto": auto, "summary": summarize(all_rows),
+    # 비교 기준: 같은 기간 KODEX 200 단순 보유 (가격 수익률, 분배금 제외)
+    bench = None
+    _, bb, _ = get_series("069500")
+    first = min((d for _, d in pairs), default=None)
+    if bb and first:
+        seg = [x for x in bb if x["d"] > first]
+        if seg:
+            days = (dt.date.fromisoformat(seg[-1]["d"]) - dt.date.fromisoformat(seg[0]["d"])).days
+            tot = seg[-1]["c"] / seg[0]["c"] - 1
+            peak, mdd = seg[0]["c"], 0.0
+            for x in seg:
+                peak = max(peak, x["c"])
+                mdd = min(mdd, x["c"] / peak - 1)
+            bench = {"code": "069500", "name": "KODEX 200", "from": seg[0]["d"], "to": seg[-1]["d"],
+                     "startPrice": seg[0]["c"], "endPrice": seg[-1]["c"], "days": days,
+                     "totalRetPct": round(tot * 100, 2),
+                     "annualRetPct": round(((1 + tot) ** (365 / days) - 1) * 100, 2) if days else None,
+                     "maxDrawdownPct": round(mdd * 100, 2)}
+    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "auto": auto, "benchmark": bench, "summary": summarize(all_rows),
                            "addStudy": add_study(pairs, cfg), "adjusted": ADJUSTED, "events": events})
 
     # 2) 실전 가상매매: buyDate 당일(휴장이면 다음 거래일) 종가 매수, 총 투자금 한도 적용
