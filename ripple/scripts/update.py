@@ -317,6 +317,68 @@ def apply_capital(positions, cfg):
             "equityRetPct": round((cash + val_open - capital) / capital * 100, 2)}
 
 
+def simulate_add(bars, start, cfg, tp, sp, add_pct=-10):
+    """추가매수 연구용: 매수가 대비 add_pct% 하락 시 budget 만큼 1회 추가 매수.
+
+    익절은 평균단가 기준 +tp%, 손절은 최초 매수가 기준 sp%(None=없음). 같은 날 추가매수와
+    손절이 겹치면 둘 다 체결(보수적), 추가매수 당일 익절은 인정하지 않는다.
+    """
+    budget, maxd = cfg["budget"], cfg["maxDays"]
+    idx = next((i for i, b in enumerate(bars) if b["d"] > start), None)
+    if idx is None:
+        return None
+    eb = bars[idx]
+    entry = eb["c"]
+    qty = int(budget // entry)
+    if qty <= 0:
+        return None
+    invested, added = qty * entry, False
+    add_lv = entry * (1 + add_pct / 100)
+    stop = entry * (1 + sp / 100) if sp is not None else -1.0
+    deadline = (dt.date.fromisoformat(eb["d"]) + dt.timedelta(days=maxd)).isoformat()
+    status, exit_px, exit_d = "보유", None, None
+    for b in bars[idx + 1:]:
+        just_added = False
+        if not added and b["l"] <= add_lv:
+            px = min(add_lv, b["o"])
+            q2 = int(budget // px)
+            qty, invested, added, just_added = qty + q2, invested + q2 * px, True, True
+        avg = invested / qty
+        if b["l"] <= stop:
+            status, exit_px, exit_d = "손절", min(stop, b["o"]), b["d"]
+        elif not just_added and b["h"] >= avg * (1 + tp / 100):
+            status, exit_px, exit_d = "익절", max(avg * (1 + tp / 100), b["o"]), b["d"]
+        elif b["d"] >= deadline:
+            status, exit_px, exit_d = "기간만료", b["c"], b["d"]
+        if exit_px is not None:
+            break
+    last = bars[-1]
+    cur = exit_px if exit_px is not None else last["c"]
+    return {"status": status, "invested": round(invested), "pnl": round(qty * cur - invested), "added": added,
+            "holdDays": (dt.date.fromisoformat(exit_d or last["d"]) - dt.date.fromisoformat(eb["d"])).days}
+
+
+def add_study(pairs, cfg):
+    out = []
+    for tp in (10, 15, 20, 30, 40, 50):
+        for sp in (-15, -20, -30, None):
+            base = [simulate(get_series(c)[1], d, True, {**cfg, "targetPct": tp, "stopPct": sp}) for c, d in pairs]
+            base = [r for r in base if r.get("status") in CLOSED + ("보유",)]
+            adds = [r for r in (simulate_add(get_series(c)[1], d, cfg, tp, sp) for c, d in pairs) if r]
+
+            def stat(rows):
+                inv = sum(r["invested"] for r in rows)
+                pnl = sum(r["pnl"] for r in rows)
+                return {"pnl": pnl, "invested": inv, "retPct": round(pnl / inv * 100, 2) if inv else None,
+                        "target": sum(r["status"] == "익절" for r in rows), "stop": sum(r["status"] == "손절" for r in rows),
+                        "expired": sum(r["status"] == "기간만료" for r in rows), "open": sum(r["status"] == "보유" for r in rows),
+                        "avgHoldDays": round(sum(r["holdDays"] for r in rows) / len(rows), 1) if rows else None}
+            a = stat(adds)
+            a["addCount"] = sum(1 for r in adds if r["added"])
+            out.append({"targetPct": tp, "stopPct": sp, "noAdd": stat(base), "withAdd": a})
+    return out
+
+
 def main():
     cfg = load("config.json")
     stamp = now_kst().strftime("%Y-%m-%d %H:%M KST")
@@ -358,7 +420,7 @@ def main():
         ev.pop("stocks", None)
         ev["summary"] = summarize(ev["results"])
     dump("backtest.json", {"generatedAt": stamp, "config": cfg, "auto": auto, "summary": summarize(all_rows),
-                           "adjusted": ADJUSTED, "events": events})
+                           "addStudy": add_study(pairs, cfg), "adjusted": ADJUSTED, "events": events})
 
     # 2) 실전 가상매매: buyDate 당일(휴장이면 다음 거래일) 종가 매수, 총 투자금 한도 적용
     trades = load("trades.json", [])
