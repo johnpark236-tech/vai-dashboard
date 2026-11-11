@@ -31,7 +31,7 @@ tr:last-child td{border-bottom:0}
 .up{color:var(--up)}.down{color:var(--down)}
 .chip{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--chip);font-size:12px}
 .st-익절{background:var(--up);color:#fff}.st-손절{background:var(--down);color:#fff}
-.st-코드불일치,.st-데이터없음{background:#b45309;color:#fff}
+.st-코드불일치,.st-데이터없음,.st-자금부족{background:#b45309;color:#fff}
 .code{color:var(--mute);font-size:12px}
 details{border-bottom:1px solid var(--line)}details:last-child{border-bottom:0}
 summary{padding:11px 14px;cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
@@ -84,6 +84,8 @@ function renderLive(p) {
   const done = pos.filter(x => ['익절', '손절', '기간만료'].includes(x.status));
   const other = pos.filter(x => !holding.includes(x) && !done.includes(x));
   let h = `<div class="kpis">
+    ${kpi('총자산 (원금 ' + won(s.capital) + ')', won(s.equity) + '원 <small>' + pct(s.equityRetPct) + '</small>', sign(s.equityRetPct))}
+    ${kpi('현금 잔고', won(s.cash) + '원' + (s.canBuy === false ? ' <small>매수 불가</small>' : ''))}
     ${kpi('보유 종목', holding.length + '개')}
     ${kpi('보유 매입금액', won(s.investedOpen) + '원')}
     ${kpi('보유 평가금액', won(s.valueOpen) + '원')}
@@ -133,9 +135,13 @@ function renderBT(b) {
     ${kpi('종료 건 평균수익률', pct(s.avgRetClosed), sign(s.avgRetClosed))}
     ${kpi('총손익', swon(s.pnlTotal) + '원', sign(s.pnlTotal))}
     ${kpi('86일 내 최고점 평균', pct(s.avgWindowPeak))}
-    ${kpi('최고점 +20%↑ / +50%↑ / +120%↑', `${s.reach20} / ${s.reach50} / ${s.reach120}`)}
   </div>
   <div class="card"><p class="note">매수: 뉴스 발생일 <b>다음 거래일 종가</b>. "86일 최고"는 손절 여부와 무관하게 매수 후 86일 동안 찍은 최고 수익률로, 목표 수익률을 조정할 때 참고하는 값입니다. 사건과 종목은 사후에 알려진 대표 사례를 고른 것이어서 실전보다 결과가 좋게 나올 수 있습니다. 코드와 종목명이 가격 소스와 다르면 "코드불일치"로 제외됩니다 (제외 ${s.excluded}개).</p></div>
+  ${b.auto ? `<div class="card"><h2>익절·손절 자동 설정: 익절 +${esc(b.auto.targetPct)}% / 손절 ${esc(b.auto.stopPct)}%</h2>
+    <p class="note">과거 사건 ${esc(b.auto.samples)}종목으로 익절 5~60%, 손절 -5~-30% 조합을 모두 계산해, 1억원·종목당 ${won(b.auto.budget)}원 기준 연 기대수익이 가장 큰 값을 골랐습니다 (이웃 값과 평균한 점수 기준, 설정일 ${esc(b.auto.tunedAt)}).</p>
+    <div class="scroll"><table><tr><th>익절</th><th>손절</th><th>건당 평균수익률</th><th>평균 보유일</th><th>연 매매 건수</th><th>연 기대수익</th><th>익절/손절/만료</th><th>승률</th></tr>
+    ${(b.auto.top || []).map(g => `<tr><td>+${esc(g.targetPct)}%</td><td>${esc(g.stopPct)}%</td><td class="${sign(g.avgRetPct)}">${pct(g.avgRetPct)}</td><td>${esc(g.avgHoldDays)}</td><td>${esc(g.tradesPerYear)}</td><td class="${sign(g.annualProfit)}">${swon(g.annualProfit)}</td><td>${esc(g.target)}/${esc(g.stop)}/${esc(g.expired)}</td><td>${esc(g.winRate)}%</td></tr>`).join('')}
+    </table></div></div>` : ''}
   <div class="card"><h2>사건별 결과</h2>`;
   h += b.events.map(ev => `<details>
     <summary><span class="code">${esc(ev.date)}</span><b>${esc(ev.name)}</b><span class="chip">${esc(ev.type)}</span><span class="${sign(ev.summary.pnlTotal)}">${swon(ev.summary.pnlTotal)}원</span></summary>
@@ -156,6 +162,8 @@ function renderRule(c) {
   $('#rule').innerHTML = `<div class="card"><h2>운용 규칙</h2><ol class="rules">
     <li>평일 장 마감 후 당일 뉴스를 VAI-RIPPLE 방식(사건 → 인과경로 → 수혜 종목)으로 심층 분석해 <b>하루 1종목</b>을 고릅니다.</li>
     <li>종목당 <b>${won(c.budget)}원</b>을 당일 종가로 가상 매수합니다 (휴장일이면 다음 거래일 종가).</li>
+    <li>총 투자금은 <b>${won(c.capital)}원</b>입니다. 현금 잔고가 ${won(c.budget)}원보다 적으면 매수하지 않고, 익절·손절·만료로 현금이 돌아오면 다시 매수합니다.</li>
+    <li>익절·손절 값은 과거 뉴스 백테스트에서 연 기대수익이 가장 큰 조합으로 자동 설정됩니다.</li>
     <li>매수가 대비 <b>+${c.targetPct}%</b>에 도달하면 익절합니다.</li>
     <li>매수가 대비 <b>${c.stopPct}%</b>에 도달하면 손절합니다. 같은 날 둘 다 닿으면 손절로 처리합니다.</li>
     <li>매수 후 달력 기준 <b>${c.maxDays}일</b>이 지나면 종가에 매도합니다.</li>
@@ -167,7 +175,7 @@ function renderRule(c) {
 (async () => {
   const [p, b, c] = await Promise.all([get('portfolio.json'), get('backtest.json'), get('config.json')]);
   $('#stamp').textContent = '가격 기준: ' + ((p && p.generatedAt) || (b && b.generatedAt) || '갱신 전') + ' · 평일 장 마감 후 자동 갱신';
-  renderLive(p); renderBT(b); renderRule(c);
+  renderLive(p); renderBT(b); renderRule((p && p.config) || (b && b.config) || c);
 })();
 </script>
 </body>

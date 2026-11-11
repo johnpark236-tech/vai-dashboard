@@ -253,13 +253,100 @@ def summarize(rows):
     }
 
 
+TP_GRID = list(range(5, 65, 5))
+SP_GRID = [-5, -10, -15, -20, -25, -30]
+
+
+def auto_tune(pairs, cfg):
+    """백테스트 종목으로 익절·손절 조합을 전수 계산해 1억 자본 기준 연 기대수익이 가장 큰 값을 고른다.
+
+    한 칸만 튀는 값(과최적화)을 피하려고 이웃 칸과 평균한 점수로 순위를 매긴다.
+    """
+    slots = max(1, cfg["capital"] // cfg["budget"])
+    grid = {}
+    for sp in SP_GRID:
+        for tp in TP_GRID:
+            c2 = {**cfg, "targetPct": tp, "stopPct": sp}
+            rows = [simulate(get_series(code)[1], d, True, c2) for code, d in pairs]
+            rows = [r for r in rows if r.get("status") in CLOSED + ("보유",)]
+            if not rows:
+                continue
+            avg_ret = sum(r["retPct"] for r in rows) / len(rows)
+            avg_hold = max(1.0, sum(r["holdDays"] for r in rows) / len(rows))
+            per_year = min(245.0, slots * 365.0 / avg_hold)  # 하루 1종목, 동시 보유 한도 반영
+            sm = summarize(rows)
+            grid[(tp, sp)] = {"targetPct": tp, "stopPct": sp, "avgRetPct": round(avg_ret, 2),
+                              "avgHoldDays": round(avg_hold, 1), "tradesPerYear": round(per_year),
+                              "annualProfit": round(per_year * cfg["budget"] * avg_ret / 100),
+                              "target": sm["target"], "stop": sm["stop"], "expired": sm["expired"],
+                              "winRate": sm["winRate"]}
+    for (tp, sp), g in grid.items():
+        ti, si = TP_GRID.index(tp), SP_GRID.index(sp)
+        near = [grid[k]["annualProfit"] for k in (
+            (tp, sp),
+            (TP_GRID[ti - 1], sp) if ti > 0 else None, (TP_GRID[ti + 1], sp) if ti + 1 < len(TP_GRID) else None,
+            (tp, SP_GRID[si - 1]) if si > 0 else None, (tp, SP_GRID[si + 1]) if si + 1 < len(SP_GRID) else None,
+        ) if k in grid]
+        g["score"] = round(sum(near) / len(near))
+    ranked = sorted(grid.values(), key=lambda g: g["score"], reverse=True)
+    return ranked
+
+
+def apply_capital(positions, cfg):
+    """총 투자금 한도: 매수일 순서로 현금이 모자라면 '자금부족'으로 매수하지 않는다."""
+    capital = cfg["capital"]
+    accepted = []
+    cand = [p for p in positions if p.get("status") in CLOSED + ("보유",)]
+    for p in sorted(cand, key=lambda x: (x["entryDate"], x.get("id", ""))):
+        d = p["entryDate"]
+        cash = capital
+        for a in accepted:
+            if a.get("exitDate") and a["exitDate"] < d:
+                cash += a["pnl"]          # 매도 완료: 원금 회수 + 손익
+            else:
+                cash -= a["invested"]     # 아직 보유 중
+        if cash < p["invested"]:
+            p["status"] = "자금부족"
+        else:
+            accepted.append(p)
+    realized = sum(a["pnl"] for a in accepted if a["status"] in CLOSED)
+    inv_open = sum(a["invested"] for a in accepted if a["status"] == "보유")
+    val_open = sum(a["value"] for a in accepted if a["status"] == "보유")
+    cash = capital + realized - inv_open
+    return {"capital": capital, "cash": cash, "equity": cash + val_open,
+            "equityRetPct": round((cash + val_open - capital) / capital * 100, 2)}
+
+
 def main():
     cfg = load("config.json")
     stamp = now_kst().strftime("%Y-%m-%d %H:%M KST")
+    events = load("events.json", [])
+
+    # 0) 유효 종목(코드·종목명 확인) 목록
+    pairs = []
+    for ev in events:
+        for st in ev.get("stocks", []):
+            src_name, bars, _ = get_series(st["code"])
+            if bars and name_ok(st["name"], src_name) is not False:
+                pairs.append((st["code"], ev["date"]))
+
+    # 0-1) 익절·손절 자동 설정 (한 번 정하면 auto.json 에 고정. 다시 맞추려면 auto.json 삭제)
+    auto = None
+    if cfg.get("auto"):
+        auto = load("auto.json")
+        if not auto or auto.get("budget") != cfg["budget"] or auto.get("capital") != cfg["capital"] or auto.get("maxDays") != cfg["maxDays"]:
+            ranked = auto_tune(pairs, cfg)
+            if ranked:
+                best = ranked[0]
+                auto = {"targetPct": best["targetPct"], "stopPct": best["stopPct"], "tunedAt": stamp,
+                        "budget": cfg["budget"], "capital": cfg["capital"], "maxDays": cfg["maxDays"],
+                        "best": best, "top": ranked[:8], "grid": ranked, "samples": len(pairs)}
+                dump("auto.json", auto)
+        if auto:
+            cfg = {**cfg, "targetPct": auto["targetPct"], "stopPct": auto["stopPct"]}
 
     # 1) 백테스트: 뉴스일 다음 거래일 종가 매수
-    events = load("events.json", [])
-    all_rows, pairs = [], []
+    all_rows = []
     for ev in events:
         print(f"[백테스트] {ev['date']} {ev['name']}")
         ev["results"] = []
@@ -268,48 +355,23 @@ def main():
             r["reason"] = st.get("reason", "")
             ev["results"].append(r)
             all_rows.append(r)
-            if r.get("status") in CLOSED + ("보유",):
-                pairs.append((st["code"], ev["date"]))
         ev.pop("stocks", None)
         ev["summary"] = summarize(ev["results"])
-    # 목표 수익률 × 손절률 탐색 (같은 종목·같은 매수일)
-    sweep = []
-    for sp in (-10, -15, -20, -30):
-        for tp in list(range(5, 101, 5)) + [120, 150]:
-            c2 = {**cfg, "targetPct": tp, "stopPct": sp}
-            sm = summarize([simulate(get_series(code)[1], d, True, c2) for code, d in pairs])
-            sweep.append({"targetPct": tp, "stopPct": sp, "pnlTotal": sm["pnlTotal"], "retTotalPct": sm["retTotalPct"],
-                          "target": sm["target"], "stop": sm["stop"], "expired": sm["expired"], "open": sm["open"],
-                          "winRate": sm["winRate"]})
-    # 손절 유무 × 보유기간 시나리오
-    scenarios = []
-    for tp in (10, 15, 20, 30, 40, 50):
-        for sp in (-15, None):
-            for md in (86, 180, 365, None):
-                c2 = {**cfg, "targetPct": tp, "stopPct": sp, "maxDays": md}
-                rows = [simulate(get_series(code)[1], d, True, c2) for code, d in pairs]
-                sm = summarize(rows)
-                opened = [r for r in rows if r["status"] == "보유"]
-                scenarios.append({"targetPct": tp, "stopPct": sp, "maxDays": md,
-                                  "pnlTotal": sm["pnlTotal"], "retTotalPct": sm["retTotalPct"],
-                                  "target": sm["target"], "stop": sm["stop"], "expired": sm["expired"],
-                                  "open": sm["open"], "pnlOpen": sm["pnlOpen"], "pnlClosed": sm["pnlClosed"],
-                                  "avgHoldDays": round(sum(r["holdDays"] for r in rows) / len(rows), 1) if rows else None,
-                                  "maxHoldDays": max((r["holdDays"] for r in rows), default=None),
-                                  "worstOpenPct": min((r["retPct"] for r in opened), default=None),
-                                  "worstTroughPct": min((r["troughPct"] for r in rows), default=None)})
-    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "summary": summarize(all_rows), "sweep": sweep,
-                           "scenarios": scenarios, "adjusted": ADJUSTED, "events": events})
+    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "auto": auto, "summary": summarize(all_rows),
+                           "adjusted": ADJUSTED, "events": events})
 
-    # 2) 실전 가상매매: buyDate 당일(휴장이면 다음 거래일) 종가 매수
+    # 2) 실전 가상매매: buyDate 당일(휴장이면 다음 거래일) 종가 매수, 총 투자금 한도 적용
     trades = load("trades.json", [])
     positions = []
     for t in trades:
         print(f"[실전] {t['buyDate']} {t['name']}({t['code']})")
         r = evaluate(t["code"], t["name"], t["buyDate"], False, cfg)
         positions.append({**t, **r})
-    dump("portfolio.json", {"generatedAt": stamp, "config": cfg, "summary": summarize(positions), "positions": positions})
-    print("완료:", stamp)
+    ledger = apply_capital(positions, cfg)
+    summary = {**summarize(positions), **ledger}
+    summary["canBuy"] = ledger["cash"] >= cfg["budget"]
+    dump("portfolio.json", {"generatedAt": stamp, "config": cfg, "summary": summary, "positions": positions})
+    print("완료:", stamp, "| 익절", cfg["targetPct"], "손절", cfg["stopPct"], "| 현금", ledger["cash"])
 
 
 if __name__ == "__main__":

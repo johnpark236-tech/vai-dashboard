@@ -26,4 +26,4 @@ The backend must allow the Pages origin and must have:
 - `ripple/data/events.json` — 과거 뉴스 백테스트 사건 목록
 - `ripple/data/trades.json` — 실전 가상매수 기록
 - `ripple/scripts/update.py` — 가격 수집·백테스트·현황 계산 (GitHub Actions 가 평일 장 마감 후 실행)
-- 규칙: 종목당 1천만원, +120% 익절, -15% 손절, 최장 86일
+- 규칙: 종목당 300만원, 총 투자금 1억원 한도, 익절·손절은 백테스트 기반 자동 설정(`ripple/data/auto.json`), 최장 86일

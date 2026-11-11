@@ -35,7 +35,7 @@ jobs:
         run: |
           git config user.name "ripple-bot"
           git config user.email "ripple-bot@users.noreply.github.com"
-          git add ripple/data/backtest.json ripple/data/portfolio.json
+          git add -A ripple/data
           if git diff --cached --quiet; then
             echo "변경 없음"
           else
