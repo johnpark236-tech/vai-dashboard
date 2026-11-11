@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-11 22:36 KST",
+ "generatedAt": "2026-11-11 22:58 KST",
  "config": {
   "budget": 3000000,
   "targetPct": 40,
@@ -1098,6 +1098,608 @@
   "reach50": 14,
   "reach120": 1
  },
+ "addStudy": [
+  {
+   "targetPct": 10,
+   "stopPct": -15,
+   "noAdd": {
+    "pnl": 5815313,
+    "invested": 143417145,
+    "retPct": 4.05,
+    "target": 33,
+    "stop": 14,
+    "expired": 1,
+    "open": 0,
+    "avgHoldDays": 9.4
+   },
+   "withAdd": {
+    "pnl": 743873,
+    "invested": 194261994,
+    "retPct": 0.38,
+    "target": 30,
+    "stop": 17,
+    "expired": 1,
+    "open": 0,
+    "avgHoldDays": 9.5,
+    "addCount": 17
+   }
+  },
+  {
+   "targetPct": 10,
+   "stopPct": -20,
+   "noAdd": {
+    "pnl": 6428425,
+    "invested": 143417145,
+    "retPct": 4.48,
+    "target": 36,
+    "stop": 11,
+    "expired": 1,
+    "open": 0,
+    "avgHoldDays": 12.3
+   },
+   "withAdd": {
+    "pnl": 1515476,
+    "invested": 194261994,
+    "retPct": 0.78,
+    "target": 34,
+    "stop": 13,
+    "expired": 1,
+    "open": 0,
+    "avgHoldDays": 12.3,
+    "addCount": 17
+   }
+  },
+  {
+   "targetPct": 10,
+   "stopPct": -30,
+   "noAdd": {
+    "pnl": 7110644,
+    "invested": 143417145,
+    "retPct": 4.96,
+    "target": 38,
+    "stop": 3,
+    "expired": 7,
+    "open": 0,
+    "avgHoldDays": 19.7
+   },
+   "withAdd": {
+    "pnl": 2156955,
+    "invested": 194261994,
+    "retPct": 1.11,
+    "target": 36,
+    "stop": 2,
+    "expired": 10,
+    "open": 0,
+    "avgHoldDays": 23.7,
+    "addCount": 17
+   }
+  },
+  {
+   "targetPct": 10,
+   "stopPct": null,
+   "noAdd": {
+    "pnl": 8195987,
+    "invested": 143417145,
+    "retPct": 5.71,
+    "target": 39,
+    "stop": 0,
+    "expired": 9,
+    "open": 0,
+    "avgHoldDays": 22.2
+   },
+   "withAdd": {
+    "pnl": 1929868,
+    "invested": 194261994,
+    "retPct": 0.99,
+    "target": 36,
+    "stop": 0,
+    "expired": 12,
+    "open": 0,
+    "avgHoldDays": 25.9,
+    "addCount": 17
+   }
+  },
+  {
+   "targetPct": 15,
+   "stopPct": -15,
+   "noAdd": {
+    "pnl": 7043059,
+    "invested": 143417145,
+    "retPct": 4.91,
+    "target": 30,
+    "stop": 17,
+    "expired": 1,
+    "open": 0,
+    "avgHoldDays": 9.8
+   },
+   "withAdd": {
+    "pnl": 3180250,
+    "invested": 197261752,
+    "retPct": 1.61,
+    "target": 29,
+    "stop": 18,
+    "expired": 1,
+    "open": 0,
+    "avgHoldDays": 9.8,
+    "addCount": 18
+   }
+  },
+  {
+   "targetPct": 15,
+   "stopPct": -20,
+   "noAdd": {
+    "pnl": 6938642,
+    "invested": 143417145,
+    "retPct": 4.84,
+    "target": 32,
+    "stop": 14,
+    "expired": 1,
+    "open": 1,
+    "avgHoldDays": 13.0
+   },
+   "withAdd": {
+    "pnl": 3007428,
+    "invested": 197261752,
+    "retPct": 1.52,
+    "target": 32,
+    "stop": 15,
+    "expired": 1,
+    "open": 0,
+    "avgHoldDays": 12.8,
+    "addCount": 18
+   }
+  },
+  {
+   "targetPct": 15,
+   "stopPct": -30,
+   "noAdd": {
+    "pnl": 6229447,
+    "invested": 143417145,
+    "retPct": 4.34,
+    "target": 33,
+    "stop": 4,
+    "expired": 10,
+    "open": 1,
+    "avgHoldDays": 24.7
+   },
+   "withAdd": {
+    "pnl": 2984010,
+    "invested": 197261752,
+    "retPct": 1.51,
+    "target": 34,
+    "stop": 4,
+    "expired": 10,
+    "open": 0,
+    "avgHoldDays": 25.1,
+    "addCount": 18
+   }
+  },
+  {
+   "targetPct": 15,
+   "stopPct": null,
+   "noAdd": {
+    "pnl": 6397847,
+    "invested": 143417145,
+    "retPct": 4.46,
+    "target": 33,
+    "stop": 0,
+    "expired": 13,
+    "open": 2,
+    "avgHoldDays": 28.1
+   },
+   "withAdd": {
+    "pnl": 5278833,
+    "invested": 197261752,
+    "retPct": 2.68,
+    "target": 35,
+    "stop": 0,
+    "expired": 12,
+    "open": 1,
+    "avgHoldDays": 28.0,
+    "addCount": 18
+   }
+  },
+  {
+   "targetPct": 20,
+   "stopPct": -15,
+   "noAdd": {
+    "pnl": 3986089,
+    "invested": 143417145,
+    "retPct": 2.78,
+    "target": 23,
+    "stop": 22,
+    "expired": 3,
+    "open": 0,
+    "avgHoldDays": 16.6
+   },
+   "withAdd": {
+    "pnl": 290565,
+    "invested": 212231673,
+    "retPct": 0.14,
+    "target": 23,
+    "stop": 22,
+    "expired": 3,
+    "open": 0,
+    "avgHoldDays": 16.6,
+    "addCount": 23
+   }
+  },
+  {
+   "targetPct": 20,
+   "stopPct": -20,
+   "noAdd": {
+    "pnl": 3433474,
+    "invested": 143417145,
+    "retPct": 2.39,
+    "target": 25,
+    "stop": 19,
+    "expired": 3,
+    "open": 1,
+    "avgHoldDays": 21.4
+   },
+   "withAdd": {
+    "pnl": -245838,
+    "invested": 212231673,
+    "retPct": -0.12,
+    "target": 26,
+    "stop": 19,
+    "expired": 3,
+    "open": 0,
+    "avgHoldDays": 21.0,
+    "addCount": 23
+   }
+  },
+  {
+   "targetPct": 20,
+   "stopPct": -30,
+   "noAdd": {
+    "pnl": 2692684,
+    "invested": 143417145,
+    "retPct": 1.88,
+    "target": 26,
+    "stop": 6,
+    "expired": 15,
+    "open": 1,
+    "avgHoldDays": 36.9
+   },
+   "withAdd": {
+    "pnl": -2213364,
+    "invested": 212231673,
+    "retPct": -1.04,
+    "target": 27,
+    "stop": 6,
+    "expired": 15,
+    "open": 0,
+    "avgHoldDays": 36.5,
+    "addCount": 23
+   }
+  },
+  {
+   "targetPct": 20,
+   "stopPct": null,
+   "noAdd": {
+    "pnl": 2589459,
+    "invested": 143417145,
+    "retPct": 1.81,
+    "target": 26,
+    "stop": 0,
+    "expired": 20,
+    "open": 2,
+    "avgHoldDays": 42.2
+   },
+   "withAdd": {
+    "pnl": -193863,
+    "invested": 212231673,
+    "retPct": -0.09,
+    "target": 28,
+    "stop": 0,
+    "expired": 19,
+    "open": 1,
+    "avgHoldDays": 41.5,
+    "addCount": 23
+   }
+  },
+  {
+   "targetPct": 30,
+   "stopPct": -15,
+   "noAdd": {
+    "pnl": 3569476,
+    "invested": 143417145,
+    "retPct": 2.49,
+    "target": 16,
+    "stop": 28,
+    "expired": 4,
+    "open": 0,
+    "avgHoldDays": 20.2
+   },
+   "withAdd": {
+    "pnl": -1124240,
+    "invested": 230199124,
+    "retPct": -0.49,
+    "target": 16,
+    "stop": 28,
+    "expired": 4,
+    "open": 0,
+    "avgHoldDays": 20.2,
+    "addCount": 29
+   }
+  },
+  {
+   "targetPct": 30,
+   "stopPct": -20,
+   "noAdd": {
+    "pnl": 2797666,
+    "invested": 143417145,
+    "retPct": 1.95,
+    "target": 18,
+    "stop": 24,
+    "expired": 5,
+    "open": 1,
+    "avgHoldDays": 25.9
+   },
+   "withAdd": {
+    "pnl": -3625050,
+    "invested": 230199124,
+    "retPct": -1.57,
+    "target": 18,
+    "stop": 24,
+    "expired": 5,
+    "open": 1,
+    "avgHoldDays": 25.9,
+    "addCount": 29
+   }
+  },
+  {
+   "targetPct": 30,
+   "stopPct": -30,
+   "noAdd": {
+    "pnl": 1327036,
+    "invested": 143417145,
+    "retPct": 0.93,
+    "target": 19,
+    "stop": 10,
+    "expired": 18,
+    "open": 1,
+    "avgHoldDays": 43.7
+   },
+   "withAdd": {
+    "pnl": -4826476,
+    "invested": 230199124,
+    "retPct": -2.1,
+    "target": 20,
+    "stop": 10,
+    "expired": 17,
+    "open": 1,
+    "avgHoldDays": 43.2,
+    "addCount": 29
+   }
+  },
+  {
+   "targetPct": 30,
+   "stopPct": null,
+   "noAdd": {
+    "pnl": 1430810,
+    "invested": 143417145,
+    "retPct": 1.0,
+    "target": 19,
+    "stop": 0,
+    "expired": 27,
+    "open": 2,
+    "avgHoldDays": 54.4
+   },
+   "withAdd": {
+    "pnl": -4605870,
+    "invested": 230199124,
+    "retPct": -2.0,
+    "target": 20,
+    "stop": 0,
+    "expired": 26,
+    "open": 2,
+    "avgHoldDays": 53.9,
+    "addCount": 29
+   }
+  },
+  {
+   "targetPct": 40,
+   "stopPct": -15,
+   "noAdd": {
+    "pnl": 6037774,
+    "invested": 143417145,
+    "retPct": 4.21,
+    "target": 15,
+    "stop": 29,
+    "expired": 4,
+    "open": 0,
+    "avgHoldDays": 21.8
+   },
+   "withAdd": {
+    "pnl": 1177474,
+    "invested": 233197623,
+    "retPct": 0.5,
+    "target": 15,
+    "stop": 29,
+    "expired": 4,
+    "open": 0,
+    "avgHoldDays": 21.8,
+    "addCount": 30
+   }
+  },
+  {
+   "targetPct": 40,
+   "stopPct": -20,
+   "noAdd": {
+    "pnl": 5715753,
+    "invested": 143417145,
+    "retPct": 3.99,
+    "target": 17,
+    "stop": 25,
+    "expired": 5,
+    "open": 1,
+    "avgHoldDays": 28.0
+   },
+   "withAdd": {
+    "pnl": -441163,
+    "invested": 233197623,
+    "retPct": -0.19,
+    "target": 17,
+    "stop": 25,
+    "expired": 5,
+    "open": 1,
+    "avgHoldDays": 28.0,
+    "addCount": 30
+   }
+  },
+  {
+   "targetPct": 40,
+   "stopPct": -30,
+   "noAdd": {
+    "pnl": 4513564,
+    "invested": 143417145,
+    "retPct": 3.15,
+    "target": 18,
+    "stop": 10,
+    "expired": 19,
+    "open": 1,
+    "avgHoldDays": 46.1
+   },
+   "withAdd": {
+    "pnl": -3449627,
+    "invested": 233197623,
+    "retPct": -1.48,
+    "target": 18,
+    "stop": 10,
+    "expired": 19,
+    "open": 1,
+    "avgHoldDays": 46.0,
+    "addCount": 30
+   }
+  },
+  {
+   "targetPct": 40,
+   "stopPct": null,
+   "noAdd": {
+    "pnl": 4617338,
+    "invested": 143417145,
+    "retPct": 3.22,
+    "target": 18,
+    "stop": 0,
+    "expired": 28,
+    "open": 2,
+    "avgHoldDays": 56.8
+   },
+   "withAdd": {
+    "pnl": -3229021,
+    "invested": 233197623,
+    "retPct": -1.38,
+    "target": 18,
+    "stop": 0,
+    "expired": 28,
+    "open": 2,
+    "avgHoldDays": 56.6,
+    "addCount": 30
+   }
+  },
+  {
+   "targetPct": 50,
+   "stopPct": -15,
+   "noAdd": {
+    "pnl": 2518700,
+    "invested": 143417145,
+    "retPct": 1.76,
+    "target": 11,
+    "stop": 32,
+    "expired": 5,
+    "open": 0,
+    "avgHoldDays": 25.8
+   },
+   "withAdd": {
+    "pnl": -2828464,
+    "invested": 242187894,
+    "retPct": -1.17,
+    "target": 11,
+    "stop": 32,
+    "expired": 5,
+    "open": 0,
+    "avgHoldDays": 25.8,
+    "addCount": 33
+   }
+  },
+  {
+   "targetPct": 50,
+   "stopPct": -20,
+   "noAdd": {
+    "pnl": 2601766,
+    "invested": 143417145,
+    "retPct": 1.81,
+    "target": 13,
+    "stop": 27,
+    "expired": 7,
+    "open": 1,
+    "avgHoldDays": 32.7
+   },
+   "withAdd": {
+    "pnl": -3160784,
+    "invested": 242187894,
+    "retPct": -1.31,
+    "target": 13,
+    "stop": 27,
+    "expired": 7,
+    "open": 1,
+    "avgHoldDays": 32.7,
+    "addCount": 33
+   }
+  },
+  {
+   "targetPct": 50,
+   "stopPct": -30,
+   "noAdd": {
+    "pnl": 1418106,
+    "invested": 143417145,
+    "retPct": 0.99,
+    "target": 14,
+    "stop": 10,
+    "expired": 23,
+    "open": 1,
+    "avgHoldDays": 52.8
+   },
+   "withAdd": {
+    "pnl": -6163263,
+    "invested": 242187894,
+    "retPct": -2.54,
+    "target": 14,
+    "stop": 10,
+    "expired": 23,
+    "open": 1,
+    "avgHoldDays": 52.4,
+    "addCount": 33
+   }
+  },
+  {
+   "targetPct": 50,
+   "stopPct": null,
+   "noAdd": {
+    "pnl": 1521880,
+    "invested": 143417145,
+    "retPct": 1.06,
+    "target": 14,
+    "stop": 0,
+    "expired": 32,
+    "open": 2,
+    "avgHoldDays": 63.5
+   },
+   "withAdd": {
+    "pnl": -5942657,
+    "invested": 242187894,
+    "retPct": -2.45,
+    "target": 14,
+    "stop": 0,
+    "expired": 32,
+    "open": 2,
+    "avgHoldDays": 63.0,
+    "addCount": 33
+   }
+  }
+ ],
  "adjusted": {
   "052670": [
    {
