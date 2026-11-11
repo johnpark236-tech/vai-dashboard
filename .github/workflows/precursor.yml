@@ -1,0 +1,40 @@
+name: 전조-눌림목 전략 백테스트
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ripple/scripts/precursor.py"
+      - ".github/workflows/precursor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: precursor
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 전 종목 백테스트
+        run: python3 ripple/scripts/precursor.py
+      - name: 결과 커밋
+        run: |
+          git config user.name "ripple-bot"
+          git config user.email "ripple-bot@users.noreply.github.com"
+          git add ripple/data/precursor.json
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "precursor: 백테스트 결과 갱신"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
