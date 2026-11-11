@@ -248,7 +248,7 @@ def main():
 
     # 1) 백테스트: 뉴스일 다음 거래일 종가 매수
     events = load("events.json", [])
-    all_rows = []
+    all_rows, pairs = [], []
     for ev in events:
         print(f"[백테스트] {ev['date']} {ev['name']}")
         ev["results"] = []
@@ -257,9 +257,20 @@ def main():
             r["reason"] = st.get("reason", "")
             ev["results"].append(r)
             all_rows.append(r)
+            if r.get("status") in CLOSED + ("보유",):
+                pairs.append((st["code"], ev["date"]))
         ev.pop("stocks", None)
         ev["summary"] = summarize(ev["results"])
-    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "summary": summarize(all_rows), "events": events})
+    # 목표 수익률 × 손절률 탐색 (같은 종목·같은 매수일)
+    sweep = []
+    for sp in (-10, -15, -20, -30):
+        for tp in list(range(5, 101, 5)) + [120, 150]:
+            c2 = {**cfg, "targetPct": tp, "stopPct": sp}
+            sm = summarize([simulate(get_series(code)[1], d, True, c2) for code, d in pairs])
+            sweep.append({"targetPct": tp, "stopPct": sp, "pnlTotal": sm["pnlTotal"], "retTotalPct": sm["retTotalPct"],
+                          "target": sm["target"], "stop": sm["stop"], "expired": sm["expired"], "open": sm["open"],
+                          "winRate": sm["winRate"]})
+    dump("backtest.json", {"generatedAt": stamp, "config": cfg, "summary": summarize(all_rows), "sweep": sweep, "events": events})
 
     # 2) 실전 가상매매: buyDate 당일(휴장이면 다음 거래일) 종가 매수
     trades = load("trades.json", [])
