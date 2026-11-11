@@ -1,0 +1,499 @@
+{
+ "generatedAt": "2026-11-12 08:12 KST",
+ "universe": 2527,
+ "rules": "거래량 급증 1차 랠리 이후 2차 랠리(1차 고점 돌파)까지 걸린 기간 조사.\n\n1차 랠리 : 일 거래량 ≥ 20일 평균의 X배 & 당일 +5% 이상으로 시작, 시작 전 종가 대비 고점 +30% 이상\n1차 종료 : 고점 대비 종가 -15% 이상 하락한 날\n2차 랠리 : 이후 고가가 1차 고점을 넘어선 날 (고점 후 250거래일까지 관찰)\n",
+ "byVolume": {
+  "3배": {
+   "n": 12042,
+   "secondRally": 7742,
+   "secondRallyPct": 64.3,
+   "daysMedian": 30.0,
+   "daysQ1": 11.0,
+   "daysQ3": 76.0,
+   "lowToBreakMedian": 13.0,
+   "rebound30Pct": 87.4,
+   "reboundDaysMedian": 37,
+   "rally1Median": 47.6,
+   "rally1DaysMedian": 6.0,
+   "depthMedianAll": -36.4,
+   "depthMedianHit": -26.9,
+   "rally2Median": 13.5,
+   "rally2Over30Pct": 15.3,
+   "rally2Over100Pct": 1.5,
+   "buckets": {
+    "2주 이내": {
+     "count": 1828,
+     "pctOfAll": 15.2
+    },
+    "2~6주": {
+     "count": 2083,
+     "pctOfAll": 17.3
+    },
+    "6~12주": {
+     "count": 1424,
+     "pctOfAll": 11.8
+    },
+    "3~6개월": {
+     "count": 1301,
+     "pctOfAll": 10.8
+    },
+    "6~12개월": {
+     "count": 1106,
+     "pctOfAll": 9.2
+    },
+    "1년 내 없음": {
+     "count": 4300,
+     "pctOfAll": 35.7
+    }
+   },
+   "buyAtPullback20": {
+    "median": -4.7,
+    "avg": -1.1,
+    "winPct": 37.5
+   },
+   "buyAtPullback60": {
+    "median": -8.9,
+    "avg": -2.0,
+    "winPct": 35.1
+   },
+   "buyAtPullback120": {
+    "median": -13.5,
+    "avg": -0.9,
+    "winPct": 34.1
+   },
+   "buyAtBreakout60": {
+    "median": -10.9,
+    "avg": -1.6,
+    "winPct": 35.5
+   }
+  },
+  "5배": {
+   "n": 9043,
+   "secondRally": 5808,
+   "secondRallyPct": 64.2,
+   "daysMedian": 29.0,
+   "daysQ1": 10.0,
+   "daysQ3": 75.0,
+   "lowToBreakMedian": 13.0,
+   "rebound30Pct": 87.9,
+   "reboundDaysMedian": 37.0,
+   "rally1Median": 47.5,
+   "rally1DaysMedian": 5,
+   "depthMedianAll": -36.7,
+   "depthMedianHit": -27.2,
+   "rally2Median": 13.3,
+   "rally2Over30Pct": 14.9,
+   "rally2Over100Pct": 1.5,
+   "buckets": {
+    "2주 이내": {
+     "count": 1477,
+     "pctOfAll": 16.3
+    },
+    "2~6주": {
+     "count": 1530,
+     "pctOfAll": 16.9
+    },
+    "6~12주": {
+     "count": 1010,
+     "pctOfAll": 11.2
+    },
+    "3~6개월": {
+     "count": 963,
+     "pctOfAll": 10.6
+    },
+    "6~12개월": {
+     "count": 828,
+     "pctOfAll": 9.2
+    },
+    "1년 내 없음": {
+     "count": 3235,
+     "pctOfAll": 35.8
+    }
+   },
+   "buyAtPullback20": {
+    "median": -5.1,
+    "avg": -1.1,
+    "winPct": 36.6
+   },
+   "buyAtPullback60": {
+    "median": -9.3,
+    "avg": -2.1,
+    "winPct": 34.3
+   },
+   "buyAtPullback120": {
+    "median": -14.0,
+    "avg": -1.5,
+    "winPct": 33.4
+   },
+   "buyAtBreakout60": {
+    "median": -11.5,
+    "avg": -2.3,
+    "winPct": 34.2
+   },
+   "byDepth": {
+    "눌림 15~25%": {
+     "n": 2430,
+     "secondRally": 2427,
+     "secondRallyPct": 99.9,
+     "daysMedian": 12,
+     "daysQ1": 6.0,
+     "daysQ3": 24.0,
+     "lowToBreakMedian": 5,
+     "rebound30Pct": 64.6,
+     "reboundDaysMedian": 12.0,
+     "rally1Median": 46.1,
+     "rally1DaysMedian": 5.0,
+     "depthMedianAll": -20.6,
+     "depthMedianHit": -20.6,
+     "rally2Median": 12.0,
+     "rally2Over30Pct": 20.6,
+     "rally2Over100Pct": 2.1,
+     "buyAtPullback20": {
+      "median": 9.3,
+      "avg": 15.4,
+      "winPct": 74.8
+     },
+     "buyAtPullback60": {
+      "median": 6.9,
+      "avg": 16.4,
+      "winPct": 62.1
+     },
+     "buyAtPullback120": {
+      "median": 3.1,
+      "avg": 18.2,
+      "winPct": 53.8
+     },
+     "buyAtBreakout60": {
+      "median": -11.7,
+      "avg": -2.4,
+      "winPct": 34.0
+     }
+    },
+    "눌림 25~40%": {
+     "n": 2504,
+     "secondRally": 2315,
+     "secondRallyPct": 92.5,
+     "daysMedian": 41,
+     "daysQ1": 17.0,
+     "daysQ3": 78.0,
+     "lowToBreakMedian": 17,
+     "rebound30Pct": 97.8,
+     "reboundDaysMedian": 29,
+     "rally1Median": 47.8,
+     "rally1DaysMedian": 5.0,
+     "depthMedianAll": -31.2,
+     "depthMedianHit": -30.8,
+     "rally2Median": 14.2,
+     "rally2Over30Pct": 22.8,
+     "rally2Over100Pct": 2.1,
+     "buyAtPullback20": {
+      "median": -1.9,
+      "avg": 3.5,
+      "winPct": 43.5
+     },
+     "buyAtPullback60": {
+      "median": 0.5,
+      "avg": 9.2,
+      "winPct": 50.9
+     },
+     "buyAtPullback120": {
+      "median": 1.3,
+      "avg": 15.0,
+      "winPct": 51.9
+     },
+     "buyAtBreakout60": {
+      "median": -10.9,
+      "avg": -1.7,
+      "winPct": 34.6
+     }
+    },
+    "눌림 40% 초과": {
+     "n": 4109,
+     "secondRally": 1066,
+     "secondRallyPct": 25.9,
+     "daysMedian": 122.0,
+     "daysQ1": 71.0,
+     "daysQ3": 180.0,
+     "lowToBreakMedian": 47.0,
+     "rebound30Pct": 95.7,
+     "reboundDaysMedian": 58,
+     "rally1Median": 48.0,
+     "rally1DaysMedian": 5,
+     "depthMedianAll": -57.3,
+     "depthMedianHit": -47.6,
+     "rally2Median": 14.8,
+     "rally2Over30Pct": 6.8,
+     "rally2Over100Pct": 0.8,
+     "buyAtPullback20": {
+      "median": -13.4,
+      "avg": -13.7,
+      "winPct": 9.9
+     },
+     "buyAtPullback60": {
+      "median": -21.2,
+      "avg": -20.0,
+      "winPct": 7.9
+     },
+     "buyAtPullback120": {
+      "median": -27.3,
+      "avg": -23.3,
+      "winPct": 10.1
+     },
+     "buyAtBreakout60": {
+      "median": -13.2,
+      "avg": -3.2,
+      "winPct": 34.1
+     }
+    }
+   },
+   "byRally1": {
+    "1차 +30~50%": {
+     "n": 4968,
+     "secondRally": 3181,
+     "secondRallyPct": 64.0,
+     "daysMedian": 35,
+     "daysQ1": 13.0,
+     "daysQ3": 83.0,
+     "lowToBreakMedian": 15,
+     "rebound30Pct": 86.2,
+     "reboundDaysMedian": 45.0,
+     "rally1Median": 38.3,
+     "rally1DaysMedian": 3.0,
+     "depthMedianAll": -36.3,
+     "depthMedianHit": -26.8,
+     "rally2Median": 13.1,
+     "rally2Over30Pct": 14.9,
+     "rally2Over100Pct": 1.4,
+     "buyAtPullback20": {
+      "median": -4.7,
+      "avg": -1.3,
+      "winPct": 36.8
+     },
+     "buyAtPullback60": {
+      "median": -8.5,
+      "avg": -1.7,
+      "winPct": 34.4
+     },
+     "buyAtPullback120": {
+      "median": -12.7,
+      "avg": -1.2,
+      "winPct": 33.9
+     },
+     "buyAtBreakout60": {
+      "median": -10.9,
+      "avg": -1.9,
+      "winPct": 33.9
+     }
+    },
+    "1차 +50~100%": {
+     "n": 3350,
+     "secondRally": 2185,
+     "secondRallyPct": 65.2,
+     "daysMedian": 23,
+     "daysQ1": 9.0,
+     "daysQ3": 69.0,
+     "lowToBreakMedian": 10,
+     "rebound30Pct": 89.3,
+     "reboundDaysMedian": 29.5,
+     "rally1Median": 63.1,
+     "rally1DaysMedian": 6.0,
+     "depthMedianAll": -36.5,
+     "depthMedianHit": -27.4,
+     "rally2Median": 13.1,
+     "rally2Over30Pct": 14.7,
+     "rally2Over100Pct": 1.5,
+     "buyAtPullback20": {
+      "median": -5.7,
+      "avg": -1.2,
+      "winPct": 36.7
+     },
+     "buyAtPullback60": {
+      "median": -10.4,
+      "avg": -2.8,
+      "winPct": 34.1
+     },
+     "buyAtPullback120": {
+      "median": -14.7,
+      "avg": -1.3,
+      "winPct": 33.4
+     },
+     "buyAtBreakout60": {
+      "median": -12.3,
+      "avg": -3.2,
+      "winPct": 34.3
+     }
+    },
+    "1차 +100% 이상": {
+     "n": 725,
+     "secondRally": 442,
+     "secondRallyPct": 61.0,
+     "daysMedian": 18.0,
+     "daysQ1": 9.0,
+     "daysQ3": 47.0,
+     "lowToBreakMedian": 9.0,
+     "rebound30Pct": 93.2,
+     "reboundDaysMedian": 16.0,
+     "rally1Median": 123.9,
+     "rally1DaysMedian": 13,
+     "depthMedianAll": -42.4,
+     "depthMedianHit": -28.9,
+     "rally2Median": 15.4,
+     "rally2Over30Pct": 16.3,
+     "rally2Over100Pct": 2.3,
+     "buyAtPullback20": {
+      "median": -6.8,
+      "avg": -0.2,
+      "winPct": 35.2
+     },
+     "buyAtPullback60": {
+      "median": -13.1,
+      "avg": -2.0,
+      "winPct": 35.2
+     },
+     "buyAtPullback120": {
+      "median": -21.3,
+      "avg": -4.9,
+      "winPct": 30.1
+     },
+     "buyAtBreakout60": {
+      "median": -12.7,
+      "avg": -0.3,
+      "winPct": 36.4
+     }
+    }
+   },
+   "byYear": {
+    "2011": {
+     "n": 1,
+     "secondRallyPct": 100.0,
+     "daysMedian": 77
+    },
+    "2013": {
+     "n": 1,
+     "secondRallyPct": 0.0,
+     "daysMedian": null
+    },
+    "2014": {
+     "n": 1,
+     "secondRallyPct": 100.0,
+     "daysMedian": 66
+    },
+    "2015": {
+     "n": 2,
+     "secondRallyPct": 0.0,
+     "daysMedian": null
+    },
+    "2016": {
+     "n": 1,
+     "secondRallyPct": 100.0,
+     "daysMedian": 3
+    },
+    "2018": {
+     "n": 90,
+     "secondRallyPct": 67.8,
+     "daysMedian": 25
+    },
+    "2019": {
+     "n": 750,
+     "secondRallyPct": 60.0,
+     "daysMedian": 36.0
+    },
+    "2020": {
+     "n": 1679,
+     "secondRallyPct": 80.9,
+     "daysMedian": 31.0
+    },
+    "2021": {
+     "n": 1774,
+     "secondRallyPct": 59.0,
+     "daysMedian": 25
+    },
+    "2022": {
+     "n": 1033,
+     "secondRallyPct": 54.8,
+     "daysMedian": 29.0
+    },
+    "2023": {
+     "n": 1361,
+     "secondRallyPct": 60.2,
+     "daysMedian": 22
+    },
+    "2024": {
+     "n": 1289,
+     "secondRallyPct": 58.3,
+     "daysMedian": 25.5
+    },
+    "2025": {
+     "n": 1061,
+     "secondRallyPct": 70.9,
+     "daysMedian": 38.0
+    }
+   }
+  },
+  "10배": {
+   "n": 5253,
+   "secondRally": 3334,
+   "secondRallyPct": 63.5,
+   "daysMedian": 26.0,
+   "daysQ1": 10.0,
+   "daysQ3": 75.0,
+   "lowToBreakMedian": 12.0,
+   "rebound30Pct": 88.9,
+   "reboundDaysMedian": 37,
+   "rally1Median": 47.6,
+   "rally1DaysMedian": 4,
+   "depthMedianAll": -37.1,
+   "depthMedianHit": -27.3,
+   "rally2Median": 13.1,
+   "rally2Over30Pct": 14.1,
+   "rally2Over100Pct": 1.4,
+   "buckets": {
+    "2주 이내": {
+     "count": 914,
+     "pctOfAll": 17.4
+    },
+    "2~6주": {
+     "count": 876,
+     "pctOfAll": 16.7
+    },
+    "6~12주": {
+     "count": 539,
+     "pctOfAll": 10.3
+    },
+    "3~6개월": {
+     "count": 528,
+     "pctOfAll": 10.1
+    },
+    "6~12개월": {
+     "count": 477,
+     "pctOfAll": 9.1
+    },
+    "1년 내 없음": {
+     "count": 1919,
+     "pctOfAll": 36.5
+    }
+   },
+   "buyAtPullback20": {
+    "median": -5.6,
+    "avg": -1.3,
+    "winPct": 35.4
+   },
+   "buyAtPullback60": {
+    "median": -9.9,
+    "avg": -2.5,
+    "winPct": 32.7
+   },
+   "buyAtPullback120": {
+    "median": -14.8,
+    "avg": -3.0,
+    "winPct": 32.1
+   },
+   "buyAtBreakout60": {
+    "median": -12.3,
+    "avg": -2.5,
+    "winPct": 33.5
+   }
+  }
+ },
+ "seconds": 288
+}
