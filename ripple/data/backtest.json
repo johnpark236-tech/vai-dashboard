@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-11 22:58 KST",
+ "generatedAt": "2026-11-11 23:01 KST",
  "config": {
   "budget": 3000000,
   "targetPct": 40,
@@ -1074,6 +1074,18 @@
    }
   ],
   "samples": 48
+ },
+ "benchmark": {
+  "code": "069500",
+  "name": "KODEX 200",
+  "from": "2023-08-25",
+  "to": "2026-11-11",
+  "startPrice": 31253.0,
+  "endPrice": 84540.0,
+  "days": 1174,
+  "totalRetPct": 170.5,
+  "annualRetPct": 36.26,
+  "maxDrawdownPct": -46.91
  },
  "summary": {
   "total": 54,
